@@ -14,6 +14,8 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { TopNav } from "@/components/top-nav"
 import { MobileSidebar } from "@/components/mobile-sidebar"
 import { NoteCard } from "@/components/note-card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { getNotes } from "@/lib/supabase/queries"
 
 function SubjectCourseContent() {
@@ -43,7 +45,7 @@ function SubjectCourseContent() {
             preview: n.description,
             author: n.profiles?.username || "Anonim",
             authorAvatar: n.profiles?.username?.substring(0, 2).toUpperCase() || "??",
-            upvotes: n.likes || 0,
+            upvotes: n.upvotes || 0,
             downloads: n.downloads || 0,
             createdAt: new Date(n.created_at).toLocaleDateString("tr-TR"),
           })))
@@ -140,8 +142,6 @@ function SubjectCourseContent() {
     </div>
   )
 }
-
-import { Badge } from "@/components/ui/badge"
 
 export default function CoursePage() {
   return (

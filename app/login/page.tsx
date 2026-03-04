@@ -39,19 +39,19 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 pt-8 pb-8">
             {/* Background Ornaments */}
             <div className="absolute -left-20 -top-20 size-96 rounded-full bg-primary/20 blur-[120px]" />
             <div className="absolute -right-20 -bottom-20 size-96 rounded-full bg-accent/20 blur-[120px]" />
 
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-md scale-90 sm:scale-95 origin-center">
                 {/* Logo */}
                 <div className="mb-8 flex flex-col items-center text-center">
                     <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-2xl shadow-primary/20 transition-transform hover:scale-105">
-                        <GraduationCap className="size-8" />
+                        <img src="/logo2.png" alt="MFLEdu" className="size-10" />
                     </div>
                     <h1 className="text-3xl font-black tracking-tight text-foreground">
-                        EAFLEdu<span className="text-primary">'ya don!</span>
+                        MFLEdu<span className="text-primary">'ya dön!</span>
                     </h1>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Turkiye'nin en aktif akademik sosyal platformuna giris yap.

@@ -126,11 +126,14 @@ export async function postReply(answerId: string, body: string) {
     const user = await getUser()
     if (!user) throw new Error("Giriş yapmalısınız")
 
-    return supabase.from("answer_replies").insert({
+    const res = await supabase.from("answer_replies").insert({
         answer_id: answerId,
         author_id: user.id,
         body,
     })
+
+    await awardPoints(user.id, 5)
+    return res
 }
 
 export async function markAnswerAccepted(answerId: string) {
@@ -228,7 +231,7 @@ export async function postNote(data: {
         file_url = pub.publicUrl
     }
 
-    return supabase.from("notes").insert({
+    const res = await supabase.from("notes").insert({
         title: data.title,
         description: data.description,
         author_id: user.id,
@@ -239,6 +242,11 @@ export async function postNote(data: {
         youtube_url: data.youtube_url ?? null,
         file_url: file_url ?? null,
     })
+
+    // Award 20 points for sharing a note
+    await awardPoints(user.id, 20)
+
+    return res
 }
 
 // ─── VOTES ────────────────────────────────────────────────────────────────────
@@ -289,9 +297,18 @@ export async function awardPoints(userId: string, pointsAmount: number) {
         .single()
 
     if (profile) {
+        const newPoints = (profile.points || 0) + pointsAmount
+        // Auto-assign badge based on point thresholds
+        let badge: string | null = null
+        if (newPoints >= 1000) badge = "Elmas"
+        else if (newPoints >= 500) badge = "Altın"
+        else if (newPoints >= 200) badge = "Gümüş"
+        else if (newPoints >= 50) badge = "Bronz"
+        else badge = "Yeni Üye"
+
         await supabase
             .from("profiles")
-            .update({ points: (profile.points || 0) + pointsAmount })
+            .update({ points: newPoints, badge })
             .eq("id", userId)
     }
 }

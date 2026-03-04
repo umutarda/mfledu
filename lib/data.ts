@@ -17,6 +17,49 @@ export const subjects: Subject[] = [
   { id: "ingilizce", name: "Ingilizce", icon: "languages" },
 ]
 
+// Units per grade-subject pair (dummy data for filtering)
+export const unitsByGradeSubject: Record<string, string[]> = {
+  "9-matematik": ["Temel Kavramlar", "Sayılar", "Üslü Sayılar", "Kareköklü Sayılar", "Oran-Orantı", "Bağıntı-Fonksiyon", "Denklemler", "Üçgenler"],
+  "10-matematik": ["Polinomlar", "İkinci Dereceden Denklemler", "Trigonometrik Fonksiyonlar", "Logaritma", "Permütasyon-Kombinasyon", "Olasılık", "İstatistik"],
+  "11-matematik": ["Dizi ve Seriler", "Limit ve Süreklilik", "Türev", "Uygulamalı Türev", "İntegral", "Karmaşık Sayılar"],
+  "12-matematik": ["Türev Uygulamaları", "İntegral Uygulamaları", "Analitik Geometri", "Vektörler", "Uzay Geometrisi", "TYT-AYT Soru Tipleri"],
+
+  "9-fizik": ["Ölçme-Birim", "Madde-Özellikler", "Hareket", "Kuvvet-Denge", "Basınç-Kaldırma Kuvveti", "Enerji-Güç-Is"],
+  "10-fizik": ["Newton Yasaları", "Atışlar", "Dairesel Hareket", "İş-Güç-Enerji", "Isı-Sıcaklık", "Elektrik"],
+  "11-fizik": ["Elektrik Alanı", "Manyetizma", "Dalgalar", "Optik", "Çağdaş Fizik"],
+  "12-fizik": ["Çemberin Analitik İncelenmesi", "Alternatif Akım", "Basit Harmonik Hareket", "Atom Modelleri"],
+
+  "9-kimya": ["Kimyaya Giriş", "Atom", "Periyodik Sistem", "Kimyasal Bağlar", "Maddenin Halleri"],
+  "10-kimya": ["Kimyasal Tepkimeler", "Mol Kavramı", "Kimyasal Hesaplamalar", "Çözeltiler", "Asit-Baz"],
+  "11-kimya": ["Organik Kimya", "Fonksiyonel Gruplar", "Karbonhidratlar", "Yağlar", "Proteinler"],
+  "12-kimya": ["Kimyasal Denge", "Elektrokimya", "Nükleer Kimya", "Polimer"],
+
+  "9-biyoloji": ["Hücre", "Canlıların Sınıflandırılması", "Fotosentez", "Solunum", "Ekosistem"],
+  "10-biyoloji": ["Mitoz-Mayoz", "Kalıtım", "Biyoteknoloji", "Bitki Biyolojisi", "Sinir Sistemi"],
+  "11-biyoloji": ["Endokrin Sistem", "Üreme", "Ekoloji", "Evrim", "Davranış"],
+  "12-biyoloji": ["DNA-Sentezi", "Gen Ekspresyonu", "Biyoteknoloji Uygulamaları", "Ekosistem Ekolojisi"],
+
+  "9-turkce": ["Sözcükte Anlam", "Cümlede Anlam", "Dil Bilgisi", "Fiil Çekimi", "Paragraf"],
+  "10-turkce": ["Anlatım Biçimleri", "Metin Türleri", "Yazım Kuralları", "Söylem-Argüman"],
+  "11-turkce": ["Dönem-Akım", "Şiir Analizi", "Roman-Hikâye", "Dil Bilgisi"],
+  "12-turkce": ["Metin Analizi", "Edebiyat Türleri", "Özet-Paragraf", "TYT/AYT Soru Tipleri"],
+
+  "9-tarih": ["Tarih Metodolojisi", "Türklerin İslamiyet'i Kabulü", "Orta Çağ Türk Devletleri"],
+  "10-tarih": ["Osmanlı Kuruluş", "Osmanlı Yükselme", "Osmanlı Duraklama", "Avrupa'da Reform"],
+  "11-tarih": ["Osmanlı Gerileme", "Birinci Dünya Savaşı", "Kurtuluş Savaşı"],
+  "12-tarih": ["İnkılaplar", "İkinci Dünya Savaşı", "Soğuk Savaş", "Çağdaş Türkiye"],
+
+  "9-cografya": ["Harita Bilgisi", "Atmosfer", "İklim", "Türkiye Yeryüzü Şekilleri"],
+  "10-cografya": ["Nüfus-Yerleşim", "Ekonomik Coğrafya", "Tarım", "Endüstri"],
+  "11-cografya": ["Küresel Ortam", "Beşeri Coğrafya", "Bölgesel Coğrafya"],
+  "12-cografya": ["Ülkeler Coğrafyası", "Türkiye'nin Coğrafi Bölgeleri", "Çevre Sorunları"],
+
+  "9-ingilizce": ["Present Tenses", "Past Tenses", "Modals", "Vocabulary: Daily Life"],
+  "10-ingilizce": ["Future Tenses", "Passive Voice", "Relative Clauses", "Vocabulary: Science"],
+  "11-ingilizce": ["Conditionals", "Reported Speech", "Phrasal Verbs", "Reading Strategies"],
+  "12-ingilizce": ["Advanced Grammar", "Essay Writing", "Speaking Skills", "YKS Exam Prep"],
+}
+
 export type NoteCard = {
   id: string
   title: string

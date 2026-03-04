@@ -88,9 +88,9 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
         <div className="flex h-16 items-center justify-between px-6">
           <Link href="/" onClick={onClose} className="flex items-center gap-2">
             <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary">
-              <GraduationCap className="size-5 text-sidebar-primary-foreground" />
+              <img src="/logo2.png" alt="MFLEdu" className="size-5" />
             </div>
-            <span className="text-lg font-bold tracking-tight">EAFLEdu</span>
+            <span className="text-lg font-bold tracking-tight">MFLEdu</span>
           </Link>
           <Button
             variant="ghost"
@@ -153,7 +153,7 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                       {subjects.map((subject) => (
                         <Link
                           key={subject.id}
-                          href={`/notes?grade=${grade}&subject=${subject.id}`}
+                          href={`/?grade=${grade}&subject=${subject.id}`}
                           onClick={onClose}
                           className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         >

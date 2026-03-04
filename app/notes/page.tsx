@@ -48,7 +48,7 @@ function NotesContent() {
                         preview: n.description,
                         author: n.profiles?.username || "Anonim",
                         authorAvatar: (n.profiles?.username || "??").substring(0, 2).toUpperCase(),
-                        upvotes: n.likes,
+                        upvotes: n.upvotes,
                         downloads: n.downloads,
                         fileUrl: n.file_url,
                         createdAt: new Date(n.created_at).toLocaleDateString("tr-TR"),
@@ -84,7 +84,7 @@ function NotesContent() {
             <div className="flex flex-1 flex-col overflow-hidden">
                 <TopNav onMenuClick={() => setMobileMenuOpen(true)} />
 
-                <main className="flex-1 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
                     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6">
                         {/* Header */}
                         <div className="mb-6">
@@ -117,8 +117,8 @@ function NotesContent() {
                                 <button
                                     onClick={() => setSelectedSubject("")}
                                     className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${!selectedSubject
-                                            ? "bg-primary text-primary-foreground shadow"
-                                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                        ? "bg-primary text-primary-foreground shadow"
+                                        : "bg-muted text-muted-foreground hover:bg-muted/80"
                                         }`}
                                 >
                                     Tümü
@@ -128,8 +128,8 @@ function NotesContent() {
                                         key={s.id}
                                         onClick={() => setSelectedSubject(selectedSubject === s.id ? "" : s.id)}
                                         className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${selectedSubject === s.id
-                                                ? "bg-primary text-primary-foreground shadow"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                            ? "bg-primary text-primary-foreground shadow"
+                                            : "bg-muted text-muted-foreground hover:bg-muted/80"
                                             }`}
                                     >
                                         {s.name}
@@ -145,8 +145,8 @@ function NotesContent() {
                                 <button
                                     onClick={() => setSelectedGrade("")}
                                     className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${!selectedGrade
-                                            ? "bg-primary text-primary-foreground shadow"
-                                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                        ? "bg-primary text-primary-foreground shadow"
+                                        : "bg-muted text-muted-foreground hover:bg-muted/80"
                                         }`}
                                 >
                                     Tümü
@@ -156,8 +156,8 @@ function NotesContent() {
                                         key={g}
                                         onClick={() => setSelectedGrade(selectedGrade === g ? "" : g)}
                                         className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${selectedGrade === g
-                                                ? "bg-primary text-primary-foreground shadow"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                            ? "bg-primary text-primary-foreground shadow"
+                                            : "bg-muted text-muted-foreground hover:bg-muted/80"
                                             }`}
                                     >
                                         {g}. Sınıf

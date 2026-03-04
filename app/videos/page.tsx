@@ -138,7 +138,7 @@ function VideosContent() {
                         youtubeUrl: n.youtube_url,
                         author: n.profiles?.username || "Anonim",
                         authorAvatar: (n.profiles?.username || "??").substring(0, 2).toUpperCase(),
-                        likes: n.likes,
+                        likes: n.upvotes,
                         createdAt: new Date(n.created_at).toLocaleDateString("tr-TR"),
                     }))
                     setVideos(videoNotes)
@@ -173,7 +173,7 @@ function VideosContent() {
             <div className="flex flex-1 flex-col overflow-hidden">
                 <TopNav onMenuClick={() => setMobileMenuOpen(true)} />
 
-                <main className="flex-1 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
                     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6">
                         {/* Header */}
                         <div className="mb-6">
