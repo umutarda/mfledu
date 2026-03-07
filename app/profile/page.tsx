@@ -22,6 +22,12 @@ import { Progress } from "@/components/ui/progress"
 import { NoteCard } from "@/components/note-card"
 import { getCurrentProfile, getProfileStats, getNotesByAuthor, getUser } from "@/lib/supabase/queries"
 
+const roleLabels: Record<string, string> = {
+  student: "Öğrenci",
+  teacher: "Öğretmen",
+  admin: "Admin",
+}
+
 // Badge logic based on points
 function getBadges(points: number, notesShared: number) {
   const badges = []
@@ -77,7 +83,8 @@ export default function ProfilePage() {
             preview: n.description,
             author: n.profiles?.username || "Anonim",
             authorAvatar: (n.profiles?.username || "??").substring(0, 2).toUpperCase(),
-            upvotes: n.likes,
+            authorRole: n.profiles?.role,
+            upvotes: n.upvotes,
             downloads: n.downloads,
             createdAt: new Date(n.created_at).toLocaleDateString("tr-TR"),
           })))
@@ -154,6 +161,19 @@ export default function ProfilePage() {
                     <p className="mt-1 text-sm text-muted-foreground italic">{profile.bio}</p>
                   )}
                   <div className="mt-2 flex items-center justify-center gap-2 sm:justify-start flex-wrap">
+                    {profile?.role && (
+                      <Badge className={`border-0 text-xs ${profile.role === 'admin' ? 'bg-red-500/10 text-red-500' :
+                        profile.role === 'teacher' ? 'bg-emerald-500/10 text-emerald-600' :
+                          'bg-blue-500/10 text-blue-500'
+                        }`}>
+                        {roleLabels[profile.role] || 'Öğrenci'}
+                      </Badge>
+                    )}
+                    {profile?.role === 'teacher' && profile?.subject && (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">
+                        {profile.subject.charAt(0).toUpperCase() + profile.subject.slice(1)} Branşı
+                      </Badge>
+                    )}
                     <Badge className="bg-accent/15 text-accent border-0 text-xs">
                       {points.toLocaleString("tr-TR")} puan
                     </Badge>
@@ -164,7 +184,7 @@ export default function ProfilePage() {
                       <Calendar className="mr-1 size-3" />
                       {memberSince} tarihinden beri üye
                     </Badge>
-                    {profile?.grade && (
+                    {profile?.grade && profile?.role !== 'teacher' && profile?.role !== 'admin' && (
                       <Badge variant="outline" className="text-xs">
                         {profile.grade}. Sınıf
                       </Badge>

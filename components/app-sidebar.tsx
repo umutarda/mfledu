@@ -24,7 +24,7 @@ import {
   User,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/components/ui/scroll-area"
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { subjects } from "@/lib/data"
@@ -60,7 +60,7 @@ const navLinks = [
 function AppSidebarInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [expandedGrades, setExpandedGrades] = useState<string[]>(["12"])
+  const [expandedGrades, setExpandedGrades] = useState<string[]>([])
   const [profile, setProfile] = useState<any>(null)
   const [stats, setStats] = useState<{ notesShared: number; totalLikes: number; rank: number } | null>(null)
 
@@ -84,17 +84,20 @@ function AppSidebarInner() {
   const activeSubject = searchParams.get("subject") || ""
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
+    <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col overflow-hidden">
       {/* Logo */}
-      <Link href="/" className="flex h-16 items-center gap-2 px-6 shrink-0">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary">
-          <img src="/logo2.png" alt="MFLEdu" className="size-5" />
+      <Link href="/" className="flex h-20 items-center gap-3 px-6 shrink-0 border-b border-sidebar-border/30">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-white/10 ring-1 ring-white/20">
+          <img src="/logo2.png" alt="MFLEdu" className="size-6" />
         </div>
-        <span className="text-lg font-bold tracking-tight">MFLEdu</span>
+        <div className="flex flex-col">
+          <span className="text-xl font-black tracking-tighter text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">MFLEdu</span>
+          <span className="text-[9px] font-bold text-sky-300 uppercase tracking-widest leading-none">Geleceğin İzinde</span>
+        </div>
       </Link>
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 px-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 sidebar-scroll">
         <nav className="flex flex-col gap-1 py-4">
           {navLinks.map((link) => {
             const isActive = pathname === link.href && !activeGrade && !activeSubject
@@ -160,74 +163,83 @@ function AppSidebarInner() {
             )
           })}
         </nav>
-      </ScrollArea>
 
-      {/* Profile Box */}
-      <div className="border-t border-border/40 p-4 shrink-0">
-        {profile ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Avatar className="size-10 ring-2 ring-primary/20">
-                <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
-                  {(profile.username || "??").substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                  {profile.full_name || profile.username}
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                  {profile.grade && (
-                    <span className="text-[10px] text-muted-foreground">{profile.grade}. Sınıf</span>
-                  )}
-                  {profile.badge && (
-                    <Badge variant="outline" className="text-[9px] px-1.5 h-4 border-primary/30 text-primary uppercase">
-                      {profile.badge}
-                    </Badge>
-                  )}
+        {/* Profile Box */}
+        <div className="mx-0 mt-4 mb-2 p-3 shrink-0 rounded-xl border border-border/50 bg-white dark:bg-zinc-950 shadow-sm">
+          {profile ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="size-10 ring-2 ring-primary/20">
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+                    {(profile.username || "??").substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                    {profile.full_name || profile.username}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                    {profile.role && (
+                      <Badge variant="outline" className={`text-[9px] px-1.5 h-4 border-0 ${profile.role === 'admin' ? 'bg-red-500/10 text-red-500' :
+                        profile.role === 'teacher' ? 'bg-emerald-500/10 text-emerald-600' :
+                          'bg-blue-500/10 text-blue-500'
+                        }`}>
+                        {profile.role === 'teacher' ? 'Öğretmen' : profile.role === 'admin' ? 'Admin' : 'Öğrenci'}
+                      </Badge>
+                    )}
+                    {profile.grade && profile.role !== 'teacher' && profile.role !== 'admin' && (
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{profile.grade}. Sınıf</span>
+                    )}
+                    {profile.badge && (
+                      <Badge variant="outline" className="text-[9px] px-1.5 h-4 border-primary/30 text-primary uppercase">
+                        {profile.badge}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-1.5 text-center">
-              <div className="rounded-lg bg-muted/50 px-1 py-1.5">
-                <p className="text-xs font-bold text-foreground">{profile.points || 0}</p>
-                <p className="text-[10px] text-muted-foreground">Puan</p>
+              {/* Stats Row */}
+              <div className="grid grid-cols-3 gap-1.5 text-center">
+                <div className="rounded-lg bg-zinc-100 dark:bg-zinc-900 px-1 py-1.5">
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">{profile.points || 0}</p>
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400">Puan</p>
+                </div>
+                <div className="rounded-lg bg-zinc-100 dark:bg-zinc-900 px-1 py-1.5">
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">{stats?.totalLikes ?? "—"}</p>
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 flex items-center justify-center gap-0.5">
+                    <Heart className="size-2.5" />Beğeni
+                  </p>
+                </div>
+                <div className="rounded-lg bg-zinc-100 dark:bg-zinc-900 px-1 py-1.5">
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    {stats ? `#${stats.rank}` : "—"}
+                  </p>
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 flex items-center justify-center gap-0.5">
+                    <Star className="size-2.5" />Sıra
+                  </p>
+                </div>
               </div>
-              <div className="rounded-lg bg-muted/50 px-1 py-1.5">
-                <p className="text-xs font-bold text-foreground">{stats?.totalLikes ?? "—"}</p>
-                <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
-                  <Heart className="size-2.5" />Beğeni
-                </p>
-              </div>
-              <div className="rounded-lg bg-muted/50 px-1 py-1.5">
-                <p className="text-xs font-bold text-foreground">
-                  {stats ? `#${stats.rank}` : "—"}
-                </p>
-                <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
-                  <Star className="size-2.5" />Sıra
-                </p>
-              </div>
-            </div>
 
-            <Link
-              href="/profile"
-              className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold py-1.5 transition-colors"
-            >
-              <User className="size-3.5" />
-              Profili Görüntüle
-            </Link>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 animate-pulse">
-            <div className="size-10 rounded-full bg-sidebar-accent" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3 w-20 bg-sidebar-accent rounded" />
-              <div className="h-2 w-12 bg-sidebar-accent rounded" />
+              <Link
+                href="/profile"
+                className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold py-1.5 transition-colors"
+              >
+                <User className="size-3.5" />
+                Profili Görüntüle
+              </Link>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-3 animate-pulse">
+              <div className="size-10 rounded-full bg-sidebar-accent" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-20 bg-sidebar-accent rounded" />
+                <div className="h-2 w-12 bg-sidebar-accent rounded" />
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="h-6 shrink-0" />
       </div>
     </aside>
   )

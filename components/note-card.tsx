@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import type { NoteCard as NoteCardType } from "@/lib/data"
+import { vote } from "@/lib/supabase/queries"
 import { toast } from "sonner"
+
+const roleLabels: Record<string, string> = {
+  teacher: "Öğretmen",
+  admin: "Admin",
+}
 
 interface NoteCardProps {
   note: NoteCardType
@@ -31,16 +37,35 @@ export function NoteCard({ note }: NoteCardProps) {
   const [upvotes, setUpvotes] = useState(note.upvotes)
   const [hasUpvoted, setHasUpvoted] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [voting, setVoting] = useState(false)
 
-  function handleUpvote() {
-    if (hasUpvoted) {
-      setUpvotes((prev) => prev - 1)
-      setHasUpvoted(false)
-    } else {
-      setUpvotes((prev) => prev + 1)
-      setHasUpvoted(true)
+  async function handleUpvote() {
+    if (voting) return
+    setVoting(true)
+    try {
+      const result = await vote(note.id, "note", "up")
+      if (result.action === "added") {
+        setUpvotes((prev) => prev + 1)
+        setHasUpvoted(true)
+      } else if (result.action === "removed") {
+        setUpvotes((prev) => prev - 1)
+        setHasUpvoted(false)
+      }
+    } catch {
+      // If not logged in, fall back to local toggle
+      if (hasUpvoted) {
+        setUpvotes((prev) => prev - 1)
+        setHasUpvoted(false)
+      } else {
+        setUpvotes((prev) => prev + 1)
+        setHasUpvoted(true)
+      }
+    } finally {
+      setVoting(false)
     }
   }
+
+  const roleBadge = note.authorRole && roleLabels[note.authorRole]
 
   return (
     <>
@@ -100,6 +125,11 @@ export function NoteCard({ note }: NoteCardProps) {
               </AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground">{note.author}</span>
+            {roleBadge && (
+              <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5">
+                {roleBadge}
+              </Badge>
+            )}
             <span className="text-xs text-muted-foreground/50">
               {note.createdAt}
             </span>
@@ -107,6 +137,7 @@ export function NoteCard({ note }: NoteCardProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={handleUpvote}
+              disabled={voting}
               className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${hasUpvoted
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -178,9 +209,16 @@ export function NoteCard({ note }: NoteCardProps) {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {note.author}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-foreground">
+                      {note.author}
+                    </p>
+                    {roleBadge && (
+                      <Badge variant="outline" className="text-[9px] h-4 px-1 border-emerald-500/30 text-emerald-600">
+                        {roleBadge}
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {note.createdAt}
                   </p>

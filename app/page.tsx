@@ -31,6 +31,13 @@ import {
 } from "lucide-react"
 import { getQuestions, getNotes, getCurrentProfile, getLeaderboard } from "@/lib/supabase/queries"
 
+const getYoutubeId = (url?: string) => {
+  if (!url) return null
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+  const match = url.match(regExp)
+  return match && match[2].length === 11 ? match[2] : null
+}
+
 function DashboardContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -45,6 +52,7 @@ function DashboardContent() {
   const filterGrade = searchParams.get("grade") || ""
   const filterSubject = searchParams.get("subject") || ""
   const [selectedUnit, setSelectedUnit] = useState("")
+  const [roleFilter, setRoleFilter] = useState<"" | "student" | "teacher">("")
 
   // Reset unit when subject/grade changes
   useEffect(() => {
@@ -86,6 +94,7 @@ function DashboardContent() {
               author: q.profiles?.username || "Anonim",
               authorAvatar: q.profiles?.username?.substring(0, 2).toUpperCase() || "??",
               authorBadge: q.profiles?.badge,
+              authorRole: q.profiles?.role,
               createdAt: new Date(q.created_at).toLocaleDateString("tr-TR"),
               subject: q.subject,
               grade: q.grade,
@@ -109,6 +118,7 @@ function DashboardContent() {
             preview: n.description,
             author: n.profiles?.username || "Anonim",
             authorAvatar: n.profiles?.username?.substring(0, 2).toUpperCase() || "??",
+            authorRole: n.profiles?.role,
             upvotes: n.upvotes,
             downloads: n.downloads,
             youtubeUrl: n.youtube_url,
@@ -145,9 +155,14 @@ function DashboardContent() {
     return items.filter(item => item.title?.toLowerCase().includes(selectedUnit.toLowerCase()))
   }
 
-  const filteredNotes = applyUnitFilter(notes)
-  const filteredQuestions = applyUnitFilter(questions)
-  const filteredVideos = applyUnitFilter(videos)
+  function applyRoleFilter<T extends { authorRole?: string }>(items: T[]): T[] {
+    if (!roleFilter) return items
+    return items.filter(item => item.authorRole === roleFilter)
+  }
+
+  const filteredNotes = applyRoleFilter(applyUnitFilter(notes))
+  const filteredQuestions = applyRoleFilter(applyUnitFilter(questions))
+  const filteredVideos = applyRoleFilter(applyUnitFilter(videos))
 
   function clearFilters() {
     router.push("/")
@@ -161,10 +176,17 @@ function DashboardContent() {
       <MobileSidebar open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopNav onMenuClick={() => setMobileMenuOpen(true)} />
+        {/* Scrolling Marquee - Absolute Top */}
+        <div className="shrink-0 overflow-hidden bg-gradient-to-r from-primary via-indigo-600 to-primary text-white text-[11px] font-bold py-1.5 shadow-md">
+          <div className="flex whitespace-nowrap" style={{ animation: 'marquee 35s linear infinite' }}>
+            <span className="px-8">🎓 MFLEDU &mdash; MFL Gelişim ve Eğitim Platformu &nbsp;&nbsp;|&nbsp;&nbsp; Bir GENÇBİZZ Girişimcilik Projesi &nbsp;&nbsp;|&nbsp;&nbsp; Proje Sahipleri: Gülay Gülderen Sezgen, Eylül Kurnaz, Yağmur Ceylin YILDIRIM, Derin Ateş, Melinsu Yüksel, Furkan Efe Şen &nbsp;&nbsp;|&nbsp;&nbsp; İz Eğitim'in katkılarıyla hayata geçirilmiştir &nbsp;&nbsp;|&nbsp;&nbsp; 🚀 Sınav yolculuğunda en iyi arkadaşın! &nbsp;&nbsp;|&nbsp;&nbsp;</span>
+            <span className="px-8">🎓 MFLEDU &mdash; MFL Gelişim ve Eğitim Platformu &nbsp;&nbsp;|&nbsp;&nbsp; Bir GENÇBİZZ Girişimcilik Projesi &nbsp;&nbsp;|&nbsp;&nbsp; Proje Sahipleri: Gülay Gülderen Sezgen, Eylül Kurnaz, Yağmur Ceylin YILDIRIM, Derin Ateş, Melinsu Yüksel, Furkan Efe Şen &nbsp;&nbsp;|&nbsp;&nbsp; İz Eğitim'in katkılarıyla hayata geçirilmiştir &nbsp;&nbsp;|&nbsp;&nbsp; 🚀 Sınav yolculuğunda en iyi arkadaşın! &nbsp;&nbsp;|&nbsp;&nbsp;</span>
+          </div>
+        </div>
 
+        <TopNav onMenuClick={() => setMobileMenuOpen(true)} />
         <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
-          <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
+          <div className="mx-auto max-w-7xl px-3 py-6 md:px-6">
 
             {/* Welcome + Filter Banner */}
             <div className="mb-6">
@@ -242,140 +264,180 @@ function DashboardContent() {
               </div>
             )}
 
-            <div className="flex flex-col gap-6 xl:flex-row">
+            <div className="flex flex-col gap-6 lg:flex-row">
               {/* Main Feed */}
               <div className="flex-1 min-w-0">
                 <Tabs defaultValue="notes">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="notes" className="gap-1.5">
-                      <FileText className="size-3.5" />
-                      Ders Notları
-                    </TabsTrigger>
-                    <TabsTrigger value="videos" className="gap-1.5">
-                      <Play className="size-3.5" />
-                      Videolar
-                    </TabsTrigger>
-                    <TabsTrigger value="questions" className="gap-1.5">
-                      <MessageCircle className="size-3.5" />
-                      Sorular
-                    </TabsTrigger>
-                    <TabsTrigger value="unanswered" className="gap-1.5">
-                      <HelpCircle className="size-3.5" />
-                      Cevaplanmamış
-                    </TabsTrigger>
-                  </TabsList>
+                  <div className="overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0 scrollbar-hide">
+                    <TabsList className="mb-2 inline-flex min-w-max p-1 bg-muted/50 rounded-xl gap-1">
+                      <TabsTrigger value="notes" className="gap-1.5 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-blue-500/25 transition-all duration-300">
+                        <FileText className="size-3.5" />
+                        Ders Notları
+                      </TabsTrigger>
+                      <TabsTrigger value="videos" className="gap-1.5 data-[state=active]:bg-rose-600 data-[state=active]:text-white data-[state=active]:shadow-rose-500/25 transition-all duration-300">
+                        <Play className="size-3.5" />
+                        Videolar
+                      </TabsTrigger>
+                      <TabsTrigger value="questions" className="gap-1.5 data-[state=active]:bg-violet-600 data-[state=active]:text-white data-[state=active]:shadow-violet-500/25 transition-all duration-300">
+                        <MessageCircle className="size-3.5" />
+                        Sorular
+                      </TabsTrigger>
+                      <TabsTrigger value="unanswered" className="gap-1.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-amber-500/25 transition-all duration-300">
+                        <HelpCircle className="size-3.5" />
+                        Cevaplanmamış
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+
+                  {/* Role Filter Chips */}
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <span className="text-[11px] font-semibold text-muted-foreground">Paylaşan:</span>
+                    {([["", "Tümü"], ["student", "Öğrenci"], ["teacher", "Öğretmen"]] as const).map(([val, label]) => (
+                      <button
+                        key={val}
+                        onClick={() => setRoleFilter(val as any)}
+                        className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-all ${roleFilter === val
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted text-muted-foreground hover:bg-muted/70"
+                          }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
 
                   {/* Notes Tab */}
                   <TabsContent value="notes">
-                    <Tabs defaultValue="trending">
-                      <TabsList className="mb-4 h-8">
-                        <TabsTrigger value="trending" className="gap-1 text-xs h-7">
-                          <TrendingUp className="size-3" /> Popüler
-                        </TabsTrigger>
-                        <TabsTrigger value="newest" className="gap-1 text-xs h-7">
-                          <Clock className="size-3" /> En Yeni
-                        </TabsTrigger>
-                        <TabsTrigger value="top" className="gap-1 text-xs h-7">
-                          <Flame className="size-3" /> En Çok İndirilen
-                        </TabsTrigger>
-                      </TabsList>
+                    <div className="rounded-2xl bg-gradient-to-br from-blue-500/5 via-blue-400/3 to-transparent border border-blue-500/10 p-3 mb-3 -mx-1">
+                      <p className="text-[10px] font-bold text-blue-500/70 uppercase tracking-wider mb-3 flex items-center gap-1.5"><FileText className="size-3" /> Ders Notları</p>
+                      <Tabs defaultValue="trending">
+                        <TabsList className="mb-4 h-8">
+                          <TabsTrigger value="trending" className="gap-1 text-xs h-7">
+                            <TrendingUp className="size-3" /> Popüler
+                          </TabsTrigger>
+                          <TabsTrigger value="newest" className="gap-1 text-xs h-7">
+                            <Clock className="size-3" /> En Yeni
+                          </TabsTrigger>
+                          <TabsTrigger value="top" className="gap-1 text-xs h-7">
+                            <Flame className="size-3" /> En Çok İndirilen
+                          </TabsTrigger>
+                        </TabsList>
 
-                      {loading ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                          <Loader2 className="size-8 animate-spin mb-2" />
-                          <p className="text-sm">Notlar yükleniyor...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <TabsContent value="trending">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                              {filteredNotes.map(note => <NoteCard key={note.id} note={note} />)}
-                            </div>
-                            {filteredNotes.length === 0 && <EmptyState label="Not bulunamadı" />}
-                          </TabsContent>
-                          <TabsContent value="newest">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                              {[...filteredNotes].reverse().map(note => <NoteCard key={note.id} note={note} />)}
-                            </div>
-                            {filteredNotes.length === 0 && <EmptyState label="Not bulunamadı" />}
-                          </TabsContent>
-                          <TabsContent value="top">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                              {[...filteredNotes].sort((a, b) => b.downloads - a.downloads).map(note => <NoteCard key={note.id} note={note} />)}
-                            </div>
-                            {filteredNotes.length === 0 && <EmptyState label="Not bulunamadı" />}
-                          </TabsContent>
-                        </>
-                      )}
-                    </Tabs>
+                        {loading ? (
+                          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                            <Loader2 className="size-8 animate-spin mb-2" />
+                            <p className="text-sm">Notlar yükleniyor...</p>
+                          </div>
+                        ) : (
+                          <>
+                            <TabsContent value="trending">
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                {filteredNotes.map(note => <NoteCard key={note.id} note={note} />)}
+                              </div>
+                              {filteredNotes.length === 0 && <EmptyState label="Not bulunamadı" />}
+                            </TabsContent>
+                            <TabsContent value="newest">
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                {[...filteredNotes].reverse().map(note => <NoteCard key={note.id} note={note} />)}
+                              </div>
+                              {filteredNotes.length === 0 && <EmptyState label="Not bulunamadı" />}
+                            </TabsContent>
+                            <TabsContent value="top">
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                {[...filteredNotes].sort((a, b) => b.downloads - a.downloads).map(note => <NoteCard key={note.id} note={note} />)}
+                              </div>
+                              {filteredNotes.length === 0 && <EmptyState label="Not bulunamadı" />}
+                            </TabsContent>
+                          </>
+                        )}
+                      </Tabs>
+                    </div>
                   </TabsContent>
 
                   {/* Videos Tab */}
                   <TabsContent value="videos">
-                    {loading ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                        <Loader2 className="size-8 animate-spin mb-2" />
-                        <p className="text-sm">Videolar yükleniyor...</p>
-                      </div>
-                    ) : filteredVideos.length === 0 ? (
-                      <EmptyState label="Bu filtre için video bulunamadı" icon="video" />
-                    ) : (
-                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {filteredVideos.map(v => (
-                          <a
-                            key={v.id}
-                            href={`/course/${v.id}`}
-                            className="group rounded-xl border border-border/60 bg-card overflow-hidden hover:shadow-md transition-all"
-                          >
-                            <div className="aspect-video bg-muted flex items-center justify-center relative">
-                              <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors" />
-                              <div className="flex size-12 items-center justify-center rounded-full bg-red-600 shadow-lg">
-                                <Play className="size-5 text-white fill-white" />
-                              </div>
-                            </div>
-                            <div className="p-3">
-                              <p className="text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">{v.title}</p>
-                              <div className="flex items-center justify-between mt-1.5">
-                                <span className="text-xs text-muted-foreground">{v.author}</span>
-                                {v.subject && (
-                                  <Badge variant="secondary" className="text-[10px] px-1.5 h-4">{v.subject}</Badge>
-                                )}
-                              </div>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    )}
+                    <div className="rounded-2xl bg-gradient-to-br from-rose-500/5 via-rose-400/3 to-transparent border border-rose-500/10 p-3 mb-3 -mx-1">
+                      <p className="text-[10px] font-bold text-rose-500/70 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Play className="size-3" /> Video Dersler</p>
+                      {loading ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                          <Loader2 className="size-8 animate-spin mb-2" />
+                          <p className="text-sm">Videolar yükleniyor...</p>
+                        </div>
+                      ) : filteredVideos.length === 0 ? (
+                        <EmptyState label="Bu filtre için video bulunamadı" icon="video" />
+                      ) : (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          {filteredVideos.map(v => {
+                            const ytId = getYoutubeId(v.youtubeUrl)
+                            return (
+                              <a
+                                key={v.id}
+                                href={`/course/${v.id}`}
+                                className="group rounded-xl border border-border/60 bg-card overflow-hidden hover:shadow-md transition-all"
+                              >
+                                <div className="aspect-video bg-muted flex items-center justify-center relative">
+                                  {ytId ? (
+                                    <img
+                                      src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
+                                      alt={v.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : null}
+                                  <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors" />
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="flex size-12 items-center justify-center rounded-full bg-red-600 shadow-lg">
+                                      <Play className="size-5 text-white fill-white" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="p-3">
+                                  <p className="text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">{v.title}</p>
+                                  <div className="flex items-center justify-between mt-1.5">
+                                    <span className="text-xs text-muted-foreground">{v.author}</span>
+                                    {v.subject && (
+                                      <Badge variant="secondary" className="text-[10px] px-1.5 h-4">{v.subject}</Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </a>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </TabsContent>
 
                   {/* Questions Tab */}
                   <TabsContent value="questions">
-                    <Tabs defaultValue="recent" className="w-full">
-                      <TabsList className="h-9 p-1 bg-muted/50 rounded-xl mb-4">
-                        <TabsTrigger value="recent" className="rounded-lg px-4 text-xs font-bold">En Yeni</TabsTrigger>
-                        <TabsTrigger value="unanswered" className="rounded-lg px-4 text-xs font-bold">Cevaplanmamış</TabsTrigger>
-                        <TabsTrigger value="top" className="rounded-lg px-4 text-xs font-bold">En Çok Tartışılan</TabsTrigger>
-                      </TabsList>
-                      {loading ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                          <Loader2 className="size-8 animate-spin mb-2" />
-                          <p className="text-sm">Sorular yükleniyor...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <TabsContent value="recent" className="mt-0 space-y-4">
-                            {filteredQuestions.map(q => <QuestionCard key={q.id} question={q} />)}
-                            {filteredQuestions.length === 0 && <EmptyState label="Soru bulunamadı" />}
-                          </TabsContent>
-                          <TabsContent value="unanswered" className="mt-0 space-y-4">
-                            {filteredQuestions.filter(q => q.answerCount < 1).map(q => <QuestionCard key={q.id} question={q} />)}
-                          </TabsContent>
-                          <TabsContent value="top" className="mt-0 space-y-4">
-                            {[...filteredQuestions].sort((a, b) => b.answerCount - a.answerCount).map(q => <QuestionCard key={q.id} question={q} />)}
-                          </TabsContent>
-                        </>
-                      )}
-                    </Tabs>
+                    <div className="rounded-2xl bg-gradient-to-br from-violet-500/5 via-violet-400/3 to-transparent border border-violet-500/10 p-3 mb-3 -mx-1">
+                      <p className="text-[10px] font-bold text-violet-500/70 uppercase tracking-wider mb-3 flex items-center gap-1.5"><MessageCircle className="size-3" /> Sorular</p>
+                      <Tabs defaultValue="recent" className="w-full">
+                        <TabsList className="h-9 p-1 bg-muted/50 rounded-xl mb-4">
+                          <TabsTrigger value="recent" className="rounded-lg px-4 text-xs font-bold">En Yeni</TabsTrigger>
+                          <TabsTrigger value="unanswered" className="rounded-lg px-4 text-xs font-bold">Cevaplanmamış</TabsTrigger>
+                          <TabsTrigger value="top" className="rounded-lg px-4 text-xs font-bold">En Çok Tartışılan</TabsTrigger>
+                        </TabsList>
+                        {loading ? (
+                          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                            <Loader2 className="size-8 animate-spin mb-2" />
+                            <p className="text-sm">Sorular yükleniyor...</p>
+                          </div>
+                        ) : (
+                          <>
+                            <TabsContent value="recent" className="mt-0 space-y-4">
+                              {filteredQuestions.map(q => <QuestionCard key={q.id} question={q} />)}
+                              {filteredQuestions.length === 0 && <EmptyState label="Soru bulunamadı" />}
+                            </TabsContent>
+                            <TabsContent value="unanswered" className="mt-0 space-y-4">
+                              {filteredQuestions.filter(q => q.answerCount < 1).map(q => <QuestionCard key={q.id} question={q} />)}
+                            </TabsContent>
+                            <TabsContent value="top" className="mt-0 space-y-4">
+                              {[...filteredQuestions].sort((a, b) => b.answerCount - a.answerCount).map(q => <QuestionCard key={q.id} question={q} />)}
+                            </TabsContent>
+                          </>
+                        )}
+                      </Tabs>
+                    </div>
                   </TabsContent>
 
                   {/* Unanswered Tab */}
@@ -410,7 +472,7 @@ function DashboardContent() {
               </div>
 
               {/* Right Panel */}
-              <div className="w-full shrink-0 xl:w-80">
+              <div className="w-full shrink-0 lg:w-80">
                 <div className="flex flex-col gap-6">
                   <Leaderboard contributors={leaderboard.length > 0 ? leaderboard : []} />
                   <Announcements announcements={announcements} />
@@ -420,6 +482,24 @@ function DashboardContent() {
           </div>
         </main>
       </div>
+
+      {/* Fixed bottom-right İz sponsor badge - Updated size and contrast */}
+      <div className="fixed bottom-20 right-4 z-50 lg:bottom-4 flex items-center gap-3 rounded-2xl bg-white border border-orange-500/30 shadow-2xl px-4 py-2 hover:scale-105 transition-transform duration-300">
+        <div className="flex items-center justify-center p-1 rounded-lg bg-orange-50">
+          <img src="/iz logo.png" alt="İz Eğitim" className="size-10 object-contain shrink-0" />
+        </div>
+        <div className="text-right border-l pl-3 border-orange-100">
+          <p className="text-[10px] font-bold text-orange-600 leading-tight">İz Eğitim'in</p>
+          <p className="text-[10px] text-zinc-500 font-medium leading-tight">katkılarıyla</p>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   )
 }

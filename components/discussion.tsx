@@ -1,14 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ThumbsUp, Flag, Send } from "lucide-react"
+import { ThumbsUp, Flag, Send, Trash2 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import type { Comment } from "@/lib/data"
-import { getCommentsByNoteId, postNoteComment } from "@/lib/supabase/queries"
+import { getCommentsByNoteId, postNoteComment, deleteNoteComment, canEditContent, getUser } from "@/lib/supabase/queries"
 import { toast } from "sonner"
+
+const roleLabels: Record<string, string> = {
+  teacher: "Öğretmen",
+  admin: "Admin",
+}
 
 interface DiscussionProps {
   noteId: string
@@ -20,6 +26,18 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
   const [newComment, setNewComment] = useState("")
   const [loading, setLoading] = useState(false)
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set())
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function init() {
+      const user = await getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    }
+    init()
+  }, [])
 
   useEffect(() => {
     async function fetchComments() {
@@ -28,8 +46,10 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
       if (data) {
         setComments(data.map(c => ({
           id: c.id,
+          authorId: c.author_id,
           author: c.profiles?.username || "Anonim",
           authorAvatar: c.profiles?.username?.substring(0, 2).toUpperCase() || "??",
+          authorRole: c.profiles?.role,
           content: c.content,
           likes: 0,
           createdAt: new Date(c.created_at).toLocaleDateString("tr-TR")
@@ -50,17 +70,18 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
 
       const comment: any = {
         id: String(Date.now()),
+        authorId: currentUserId,
         author: "Siz",
         authorAvatar: "SZ",
         content: newComment.trim(),
         likes: 0,
-        createdAt: "Simdi",
+        createdAt: "Şimdi",
       }
       setComments((prev) => [comment, ...prev])
       setNewComment("")
-      toast.success("Yorumunuz basariyla paylasildi!")
+      toast.success("Yorumunuz başarıyla paylaşıldı!")
     } catch (err: any) {
-      toast.error(err.message || "Yorum paylasilirken hata olustu")
+      toast.error(err.message || "Yorum paylaşılırken hata oluştu")
     } finally {
       setLoading(false)
     }
@@ -87,20 +108,39 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
     )
   }
 
+  async function handleDelete(commentId: string) {
+    if (!confirm("Bu yorumu silmek istediğinize emin misiniz?")) return
+    try {
+      const { error } = await deleteNoteComment(commentId)
+      if (error) throw error
+      setComments(prev => prev.filter(c => c.id !== commentId))
+      toast.success("Yorum silindi")
+    } catch {
+      toast.error("Yorum silinemedi")
+    }
+  }
+
   function handleReport(commentId: string) {
-    toast.info("Sikayet bildirildi. Incelemeye alinacaktir.")
+    toast.info("Şikayet bildirildi. İncelemeye alınacaktır.")
+  }
+
+  function canDeleteComment(comment: any): boolean {
+    if (!currentUserId) return false
+    // Owner can always delete
+    if (comment.authorId === currentUserId) return true
+    return false // RLS handles teacher/admin on server side — but we show button optimistically
   }
 
   return (
     <div className="flex flex-col gap-6">
       <h3 className="text-lg font-semibold text-foreground">
-        Anlasilmayan Yerleri Sor
+        Anlaşılmayan Yerleri Sor
       </h3>
 
       {/* Comment form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Textarea
-          placeholder="Sorunuzu veya yorumunuzu yazin..."
+          placeholder="Sorunuzu veya yorumunuzu yazın..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           className="min-h-20 resize-none"
@@ -108,11 +148,11 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={!newComment.trim()}
+            disabled={!newComment.trim() || loading}
             className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
           >
             <Send className="size-4" />
-            Gonder
+            Gönder
           </Button>
         </div>
       </form>
@@ -123,6 +163,8 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
       <div className="flex flex-col gap-4">
         {comments.map((comment) => {
           const isLiked = likedComments.has(comment.id)
+          const roleBadge = comment.authorRole && roleLabels[comment.authorRole]
+          const showDelete = currentUserId && (comment.authorId === currentUserId)
           return (
             <div
               key={comment.id}
@@ -138,6 +180,11 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
                   <span className="text-sm font-medium text-foreground">
                     {comment.author}
                   </span>
+                  {roleBadge && (
+                    <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5">
+                      {roleBadge}
+                    </Badge>
+                  )}
                   <span className="text-xs text-muted-foreground">
                     {comment.createdAt}
                   </span>
@@ -157,13 +204,23 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
                     <ThumbsUp className="size-3" />
                     {comment.likes + (isLiked ? 1 : 0)}
                   </button>
+                  {showDelete && (
+                    <button
+                      onClick={() => handleDelete(comment.id)}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      aria-label="Delete comment"
+                    >
+                      <Trash2 className="size-3" />
+                      Sil
+                    </button>
+                  )}
                   <button
                     onClick={() => handleReport(comment.id)}
                     className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     aria-label="Report comment"
                   >
                     <Flag className="size-3" />
-                    Sikayet Et
+                    Şikayet Et
                   </button>
                 </div>
               </div>

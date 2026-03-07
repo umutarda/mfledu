@@ -19,38 +19,38 @@ export const subjects: Subject[] = [
 
 // Units per grade-subject pair (dummy data for filtering)
 export const unitsByGradeSubject: Record<string, string[]> = {
-  "9-matematik": ["Temel Kavramlar", "Sayılar", "Üslü Sayılar", "Kareköklü Sayılar", "Oran-Orantı", "Bağıntı-Fonksiyon", "Denklemler", "Üçgenler"],
-  "10-matematik": ["Polinomlar", "İkinci Dereceden Denklemler", "Trigonometrik Fonksiyonlar", "Logaritma", "Permütasyon-Kombinasyon", "Olasılık", "İstatistik"],
+  "9-matematik": ["Sayılar", "Nicelikler ve Değişimler", "Algoritma ve Bilişim", "Geometrik Şekiller", "Eşlik ve Benzerlik", "İstatistiksel Araştırma Süreci", "Veriden Olasılığa"],
+  "10-matematik": ["Üçgenler ve Trigonometri", "İki Kategorik Değişken İçeren Dağılımlar", "Doğal Sayı İlişkileri (EBOB/EKOK)", "Bölünebilme", "Fonksiyonlar", "Ters Fonksiyonlar", "Denklem ve Eşitsizlikler", "Sayma Yöntemleri ve Olasılık", "Nokta ve Doğru Analitiği"],
   "11-matematik": ["Dizi ve Seriler", "Limit ve Süreklilik", "Türev", "Uygulamalı Türev", "İntegral", "Karmaşık Sayılar"],
   "12-matematik": ["Türev Uygulamaları", "İntegral Uygulamaları", "Analitik Geometri", "Vektörler", "Uzay Geometrisi", "TYT-AYT Soru Tipleri"],
 
-  "9-fizik": ["Ölçme-Birim", "Madde-Özellikler", "Hareket", "Kuvvet-Denge", "Basınç-Kaldırma Kuvveti", "Enerji-Güç-Is"],
-  "10-fizik": ["Newton Yasaları", "Atışlar", "Dairesel Hareket", "İş-Güç-Enerji", "Isı-Sıcaklık", "Elektrik"],
+  "9-fizik": ["Fizik Bilimi ve Kariyer Keşfi", "Kuvvet ve Hareket", "Akışkanlar", "Enerji"],
+  "10-fizik": ["Hareket", "İş, Güç, Enerji", "Elektrik", "Dalgalar"],
   "11-fizik": ["Elektrik Alanı", "Manyetizma", "Dalgalar", "Optik", "Çağdaş Fizik"],
   "12-fizik": ["Çemberin Analitik İncelenmesi", "Alternatif Akım", "Basit Harmonik Hareket", "Atom Modelleri"],
 
-  "9-kimya": ["Kimyaya Giriş", "Atom", "Periyodik Sistem", "Kimyasal Bağlar", "Maddenin Halleri"],
-  "10-kimya": ["Kimyasal Tepkimeler", "Mol Kavramı", "Kimyasal Hesaplamalar", "Çözeltiler", "Asit-Baz"],
+  "9-kimya": ["Etkileşim", "Çeşitlilik", "Sürdürülebilirlik"],
+  "10-kimya": ["Kimyasal Tepkimeler", "Gazlar", "Çözeltiler", "Yeşil Kimya"],
   "11-kimya": ["Organik Kimya", "Fonksiyonel Gruplar", "Karbonhidratlar", "Yağlar", "Proteinler"],
   "12-kimya": ["Kimyasal Denge", "Elektrokimya", "Nükleer Kimya", "Polimer"],
 
-  "9-biyoloji": ["Hücre", "Canlıların Sınıflandırılması", "Fotosentez", "Solunum", "Ekosistem"],
-  "10-biyoloji": ["Mitoz-Mayoz", "Kalıtım", "Biyoteknoloji", "Bitki Biyolojisi", "Sinir Sistemi"],
+  "9-biyoloji": ["Yaşam", "Organizasyon"],
+  "10-biyoloji": ["Canlılık İçin Enerjinin Önemi ve ATP", "Fotosentez", "Kemosentez"],
   "11-biyoloji": ["Endokrin Sistem", "Üreme", "Ekoloji", "Evrim", "Davranış"],
   "12-biyoloji": ["DNA-Sentezi", "Gen Ekspresyonu", "Biyoteknoloji Uygulamaları", "Ekosistem Ekolojisi"],
 
-  "9-turkce": ["Sözcükte Anlam", "Cümlede Anlam", "Dil Bilgisi", "Fiil Çekimi", "Paragraf"],
-  "10-turkce": ["Anlatım Biçimleri", "Metin Türleri", "Yazım Kuralları", "Söylem-Argüman"],
+  "9-turkce": ["Giriş", "Hikaye (Öykü)", "Şiir", "Masal / Fabl", "Roman", "Tiyatro", "Biyografi / Otobiyografi", "Mektup / E-Posta", "Günlük / Blog"],
+  "10-turkce": ["Sözün Ezgisi", "Kelimelerin Ritmi", "Dünden Bugüne", "Nesillerin Mirası"],
   "11-turkce": ["Dönem-Akım", "Şiir Analizi", "Roman-Hikâye", "Dil Bilgisi"],
   "12-turkce": ["Metin Analizi", "Edebiyat Türleri", "Özet-Paragraf", "TYT/AYT Soru Tipleri"],
 
-  "9-tarih": ["Tarih Metodolojisi", "Türklerin İslamiyet'i Kabulü", "Orta Çağ Türk Devletleri"],
-  "10-tarih": ["Osmanlı Kuruluş", "Osmanlı Yükselme", "Osmanlı Duraklama", "Avrupa'da Reform"],
+  "9-tarih": ["Geçmişin İnşa Sürecinde Tarih", "Eski Çağ Medeniyetleri", "Orta Çağ Medeniyetleri"],
+  "10-tarih": ["Türkistan'dan Türkiye'ye (1040-1299)", "Beylikten Devlete Osmanlı (1299-1453)", "Cihan Devleti Osmanlı (1453-1683)"],
   "11-tarih": ["Osmanlı Gerileme", "Birinci Dünya Savaşı", "Kurtuluş Savaşı"],
   "12-tarih": ["İnkılaplar", "İkinci Dünya Savaşı", "Soğuk Savaş", "Çağdaş Türkiye"],
 
-  "9-cografya": ["Harita Bilgisi", "Atmosfer", "İklim", "Türkiye Yeryüzü Şekilleri"],
-  "10-cografya": ["Nüfus-Yerleşim", "Ekonomik Coğrafya", "Tarım", "Endüstri"],
+  "9-cografya": ["Coğrafyanın Doğası", "Mekansal Bilgi Teknolojileri", "Doğal Sistemler ve Süreçler", "Beşeri Sistemler ve Süreçler", "Ekonomik Faaliyetler ve Etkileri", "Afetler ve Sürdürülebilir Çevre", "Bölgeler, Ülkeler ve Küresel Bağlantılar"],
+  "10-cografya": ["Coğrafya Bilimi", "Mekansal Bilgi Teknolojileri", "Tektonik Süreçler ve Yeryüzü Şekilleri", "Yerleşmeler", "Ekonomik Faaliyetler", "Afetler", "Türk Kültürü"],
   "11-cografya": ["Küresel Ortam", "Beşeri Coğrafya", "Bölgesel Coğrafya"],
   "12-cografya": ["Ülkeler Coğrafyası", "Türkiye'nin Coğrafi Bölgeleri", "Çevre Sorunları"],
 
@@ -65,6 +65,7 @@ export type NoteCard = {
   title: string
   author: string
   authorAvatar: string
+  authorRole?: string
   subject: string
   grade: Grade
   upvotes: number
@@ -277,6 +278,7 @@ export type Comment = {
   id: string
   author: string
   authorAvatar: string
+  authorRole?: string
   content: string
   likes: number
   createdAt: string
@@ -320,6 +322,7 @@ export type Question = {
   author: string
   authorAvatar: string
   authorBadge?: string
+  authorRole?: string
   subject: string
   grade: Grade
   tags: string[]

@@ -170,12 +170,12 @@ function QuestionsContent() {
 
                         {/* Tabs */}
                         <Tabs defaultValue="all">
-                            <TabsList className="mb-4">
-                                <TabsTrigger value="all" className="gap-1.5 text-xs">
+                            <TabsList className="mb-4 p-1 bg-muted/50 rounded-xl gap-1">
+                                <TabsTrigger value="all" className="gap-1.5 text-xs data-[state=active]:bg-violet-600 data-[state=active]:text-white data-[state=active]:shadow-violet-500/25 transition-all duration-300">
                                     <MessageCircle className="size-3.5" />
                                     Tümü ({filteredQuestions.length})
                                 </TabsTrigger>
-                                <TabsTrigger value="unanswered" className="gap-1.5 text-xs">
+                                <TabsTrigger value="unanswered" className="gap-1.5 text-xs data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-amber-500/25 transition-all duration-300">
                                     <HelpCircle className="size-3.5" />
                                     Cevaplanmamış ({filteredQuestions.filter(q => q.answerCount === 0).length})
                                 </TabsTrigger>
@@ -189,37 +189,45 @@ function QuestionsContent() {
                             ) : (
                                 <>
                                     <TabsContent value="all" className="space-y-4">
-                                        {filteredQuestions.length === 0 ? (
-                                            <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 py-16 text-center">
-                                                <HelpCircle className="size-10 text-muted-foreground mx-auto mb-3" />
-                                                <p className="text-sm font-medium text-foreground">Soru bulunamadı</p>
-                                                <p className="text-xs text-muted-foreground mt-1">İlk soruyu sen sor!</p>
-                                            </div>
-                                        ) : (
-                                            filteredQuestions.map(q => (
-                                                <QuestionCard key={q.id} question={q} />
-                                            ))
-                                        )}
+                                        <div className="rounded-2xl bg-gradient-to-br from-violet-500/5 via-violet-400/3 to-transparent border border-violet-500/10 p-3 mb-3">
+                                            {filteredQuestions.length === 0 ? (
+                                                <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 py-16 text-center">
+                                                    <HelpCircle className="size-10 text-muted-foreground mx-auto mb-3" />
+                                                    <p className="text-sm font-medium text-foreground">Soru bulunamadı</p>
+                                                    <p className="text-xs text-muted-foreground mt-1">İlk soruyu sen sor!</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-4">
+                                                    {filteredQuestions.map(q => (
+                                                        <QuestionCard key={q.id} question={q} />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </TabsContent>
                                     <TabsContent value="unanswered" className="space-y-4">
-                                        <div className="rounded-2xl bg-amber-500/10 p-4 border border-amber-500/20 mb-4">
-                                            <p className="text-sm font-bold text-amber-600 flex items-center gap-2">
-                                                <HelpCircle className="size-4" />
-                                                Yardım Bekleyen Sorular
-                                            </p>
-                                            <p className="text-xs text-amber-600/80 mt-1">
-                                                Bu soruları cevaplayarak &quot;Yardımsever&quot; rozeti ve ek puan kazanabilirsin!
-                                            </p>
-                                        </div>
-                                        {filteredQuestions.filter(q => q.answerCount === 0).length === 0 ? (
-                                            <div className="text-center py-12 text-muted-foreground italic text-sm">
-                                                Tüm sorular cevaplanmış görünüyor. Harika bir topluluk! 🎉
+                                        <div className="rounded-2xl bg-gradient-to-br from-amber-500/5 via-amber-400/3 to-transparent border border-amber-500/10 p-3 mb-3">
+                                            <div className="rounded-2xl bg-amber-500/10 p-4 border border-amber-500/20 mb-4">
+                                                <p className="text-sm font-bold text-amber-600 flex items-center gap-2">
+                                                    <HelpCircle className="size-4" />
+                                                    Yardım Bekleyen Sorular
+                                                </p>
+                                                <p className="text-xs text-amber-600/80 mt-1">
+                                                    Bu soruları cevaplayarak &quot;Yardımsever&quot; rozeti ve ek puan kazanabilirsin!
+                                                </p>
                                             </div>
-                                        ) : (
-                                            filteredQuestions
-                                                .filter(q => q.answerCount === 0)
-                                                .map(q => <QuestionCard key={q.id} question={q} />)
-                                        )}
+                                            {filteredQuestions.filter(q => q.answerCount === 0).length === 0 ? (
+                                                <div className="text-center py-12 text-muted-foreground italic text-sm">
+                                                    Tüm sorular cevaplanmış görünüyor. Harika bir topluluk! 🎉
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-4">
+                                                    {filteredQuestions
+                                                        .filter(q => q.answerCount === 0)
+                                                        .map(q => <QuestionCard key={q.id} question={q} />)}
+                                                </div>
+                                            )}
+                                        </div>
                                     </TabsContent>
                                 </>
                             )}

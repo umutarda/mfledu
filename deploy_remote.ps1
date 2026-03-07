@@ -1,4 +1,7 @@
 # Remote Deploy Script for DigitalOcean Server
+param(
+    [switch]$NoBuild
+)
 $ErrorActionPreference = "Stop"
 
 $SERVER_IP = "167.99.136.40"
@@ -7,8 +10,19 @@ $SSH_KEY = "C:\Users\umut.tuncar\.ssh\digital_ocean"
 $REMOTE_DIR = "~/frontend_image"
 $TAR_NAME = "mfledu-frontend.tar"
 
-Write-Host "Building the Docker image locally..." -ForegroundColor Cyan
-docker build -t mfledu-frontend .
+if (-not $NoBuild) {
+    Write-Host "Building the Docker image locally..." -ForegroundColor Cyan
+    docker build -t mfledu-frontend .
+}
+else {
+    # Verify the image exists locally even if we skip build
+    $imageExists = docker images -q mfledu-frontend 2>$null
+    if (-not $imageExists) {
+        Write-Error "Error: Docker image 'mfledu-frontend' not found locally. Run without -NoBuild first."
+        exit 1
+    }
+    Write-Host "Skipping build, using existing local image." -ForegroundColor Yellow
+}
 
 Write-Host "Saving the image to a tarball ($TAR_NAME)..." -ForegroundColor Cyan
 docker save -o $TAR_NAME mfledu-frontend

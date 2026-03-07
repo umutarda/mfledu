@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { GraduationCap, Mail, Lock, ArrowRight, Github, Chrome, UserPlus } from "lucide-react"
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { toast } from "sonner"
 import { signIn } from "@/lib/supabase/queries"
+import { createClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
     const router = useRouter()
@@ -17,6 +18,26 @@ export default function LoginPage() {
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
     const [isRegister, setIsRegister] = useState(false)
+
+    useEffect(() => {
+        const supabase = createClient()
+
+        // Check initial session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                window.location.href = "/"
+            }
+        })
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                window.location.href = "/"
+            }
+        })
+
+        return () => subscription.unsubscribe()
+    }, [router])
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault()
@@ -28,8 +49,7 @@ export default function LoginPage() {
                     ? "E-posta veya şifre hatalı." : error.message)
             } else {
                 toast.success("Hoş geldiniz!")
-                router.push("/")
-                router.refresh()
+                window.location.href = "/"
             }
         } catch {
             toast.error("Bir hata oluştu. Lütfen tekrar deneyin.")
@@ -101,7 +121,7 @@ export default function LoginPage() {
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="h-12 w-full gap-2 rounded-xl bg-primary text-base font-bold text-primary-foreground shadow-xl shadow-primary/20 transition-all hover:translate-y-[-2px] hover:shadow-2xl active:translate-y-0"
+                                className="h-12 w-full gap-2 rounded-xl bg-primary mt-6 text-base font-bold text-primary-foreground shadow-xl shadow-primary/20 transition-all hover:translate-y-[-2px] hover:shadow-2xl active:translate-y-0"
                             >
                                 {loading ? (
                                     <div className="size-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
@@ -112,26 +132,6 @@ export default function LoginPage() {
                                     </>
                                 )}
                             </Button>
-
-                            <div className="relative my-6">
-                                <div className="absolute inset-0 flex items-center">
-                                    <span className="w-full border-t border-border" />
-                                </div>
-                                <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-card px-2 text-muted-foreground">Ya da sununla devam et</span>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <Button variant="outline" className="h-11 gap-2 rounded-xl border-border/60 hover:bg-muted/50" type="button">
-                                    <Github className="size-4" />
-                                    Github
-                                </Button>
-                                <Button variant="outline" className="h-11 gap-2 rounded-xl border-border/60 hover:bg-muted/50" type="button">
-                                    <Chrome className="size-4" />
-                                    Google
-                                </Button>
-                            </div>
                         </form>
 
                         <div className="mt-8 text-center text-sm">

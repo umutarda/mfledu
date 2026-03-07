@@ -20,6 +20,7 @@ import {
   Award,
   BookOpen,
   Loader2,
+  Trash2,
 } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { TopNav } from "@/components/top-nav"
@@ -45,8 +46,18 @@ import {
   postReply,
   vote,
   incrementViewCount,
-  getCurrentProfile
+  getCurrentProfile,
+  deleteQuestion,
+  deleteAnswer,
+  deleteReply,
+  canEditContent,
+  getUser
 } from "@/lib/supabase/queries"
+
+const roleLabels: Record<string, string> = {
+  teacher: "Öğretmen",
+  admin: "Admin",
+}
 
 export default function QuestionThreadPage() {
   const params = useParams()
@@ -57,6 +68,8 @@ export default function QuestionThreadPage() {
   const [answers, setAnswers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [canDelete, setCanDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     async function loadThread() {
@@ -99,6 +112,12 @@ export default function QuestionThreadPage() {
 
         // track view
         incrementViewCount(questionId)
+
+        // check permission
+        if (q.author_id) {
+          const allowed = await canEditContent(q.author_id, q.subject)
+          setCanDelete(allowed)
+        }
       } catch (err) {
         console.error(err)
       } finally {
@@ -159,14 +178,40 @@ export default function QuestionThreadPage() {
             <div className="flex flex-col gap-8 lg:flex-row">
               {/* Main Thread */}
               <div className="flex-1 min-w-0">
-                {/* Breadcrumb */}
-                <Link
-                  href="/"
-                  className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-primary hover:-translate-x-1"
-                >
-                  <ArrowLeft className="size-4" />
-                  Topluluk Akisina Don
-                </Link>
+                {/* Breadcrumb + Delete */}
+                <div className="mb-6 flex items-center justify-between">
+                  <Link
+                    href="/"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-primary hover:-translate-x-1"
+                  >
+                    <ArrowLeft className="size-4" />
+                    Topluluk Akisina Don
+                  </Link>
+                  {canDelete && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
+                      disabled={deleting}
+                      onClick={async () => {
+                        if (!confirm("Bu soruyu silmek istediğinize emin misiniz?")) return
+                        setDeleting(true)
+                        try {
+                          const { error } = await deleteQuestion(questionId)
+                          if (error) throw error
+                          toast.success("Soru silindi")
+                          router.push("/")
+                        } catch {
+                          toast.error("Silme işlemi başarısız oldu")
+                          setDeleting(false)
+                        }
+                      }}
+                    >
+                      <Trash2 className="size-3.5" />
+                      {deleting ? "Siliniyor..." : "Soruyu Sil"}
+                    </Button>
+                  )}
+                </div>
 
                 {/* Question */}
                 <QuestionHeader question={question} />
@@ -328,6 +373,14 @@ function QuestionHeader({
                       className="text-[10px] h-4 px-1.5 bg-accent/15 text-accent border-0 font-bold"
                     >
                       {question.authorBadge}
+                    </Badge>
+                  )}
+                  {question.profiles?.role && roleLabels[question.profiles.role] && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5 font-bold"
+                    >
+                      {roleLabels[question.profiles.role]}
                     </Badge>
                   )}
                 </div>

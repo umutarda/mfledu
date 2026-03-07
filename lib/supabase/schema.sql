@@ -46,6 +46,7 @@ create table if not exists public.questions (
   author_id    uuid references public.profiles (id) on delete set null,
   subject      text,
   grade        smallint,
+  unit         text,
   tags         text[] default '{}',
   youtube_url  text,
   pdf_url      text,
@@ -100,6 +101,7 @@ create table if not exists public.notes (
   author_id    uuid references public.profiles (id) on delete set null,
   subject      text,
   grade        smallint,
+  unit         text,
   note_type    text, -- 'note','summary','formula','solved','video'
   tags         text[] default '{}',
   file_url     text,  -- Supabase Storage URL

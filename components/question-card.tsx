@@ -16,11 +16,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { Question } from "@/lib/data"
 
+const roleLabels: Record<string, string> = {
+  teacher: "Öğretmen",
+  admin: "Admin",
+}
+
 interface QuestionCardProps {
   question: Question
 }
 
 export function QuestionCard({ question }: QuestionCardProps) {
+  const roleBadge = question.authorRole && roleLabels[question.authorRole]
   const [votes, setVotes] = useState(question.upvotes - question.downvotes)
   const [userVote, setUserVote] = useState<"up" | "down" | null>(null)
 
@@ -47,7 +53,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
 
   return (
     <Card className="group relative gap-0 overflow-hidden border-border/60 bg-card/50 transition-all hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 rounded-2xl">
-      <CardContent className="flex gap-4 p-5">
+      <CardContent className="flex gap-3 p-4">
         {/* Vote column */}
         <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
           <button
@@ -85,24 +91,32 @@ export function QuestionCard({ question }: QuestionCardProps) {
         {/* Content column */}
         <div className="flex-1 min-w-0">
           {/* Header */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Avatar className="size-7 border border-primary/10">
+          <div className="flex flex-col gap-1.5 mb-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <Avatar className="size-7 border border-primary/10 shrink-0">
                 <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
                   {question.authorAvatar}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-foreground transition-colors group-hover:text-primary">
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs font-bold text-foreground transition-colors group-hover:text-primary truncate">
                     {question.author}
                   </span>
                   {question.authorBadge && (
                     <Badge
                       variant="secondary"
-                      className="text-[10px] h-4 px-1 bg-accent/10 text-accent border-0"
+                      className="text-[10px] h-4 px-1 bg-accent/10 text-accent border-0 shrink-0"
                     >
                       {question.authorBadge}
+                    </Badge>
+                  )}
+                  {roleBadge && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5 shrink-0"
+                    >
+                      {roleBadge}
                     </Badge>
                   )}
                 </div>
@@ -112,7 +126,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
               </div>
             </div>
 
-            <div className="flex gap-1.5">
+            <div className="flex gap-1.5 flex-wrap">
               <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary bg-primary/5 px-2">
                 {question.subject}
               </Badge>

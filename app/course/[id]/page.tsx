@@ -2,18 +2,19 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import {
     ArrowLeft,
     ThumbsUp,
     Eye,
-    Clock,
     BookOpen,
     Loader2,
     Video,
     FileText,
     ExternalLink,
     Download,
+    Pencil,
+    Trash2,
 } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { TopNav } from "@/components/top-nav"
@@ -25,17 +26,28 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { sampleCourse, sampleComments } from "@/lib/data"
-import { getNoteById } from "@/lib/supabase/queries"
+import { sampleCourse } from "@/lib/data"
+import { getNoteById, incrementNoteViewCount, vote, canEditContent, deleteNote, getUser } from "@/lib/supabase/queries"
 import { toast } from "sonner"
+
+const roleLabels: Record<string, string> = {
+    student: "Öğrenci",
+    teacher: "Öğretmen",
+    admin: "Admin",
+}
 
 export default function CourseDetailPage() {
     const params = useParams()
+    const router = useRouter()
     const noteId = params.id as string
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [course, setCourse] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState<"video" | "pdf">("video")
+    const [hasLiked, setHasLiked] = useState(false)
+    const [likeCount, setLikeCount] = useState(0)
+    const [canEdit, setCanEdit] = useState(false)
+    const [deleting, setDeleting] = useState(false)
 
     useEffect(() => {
         async function loadCourse() {
@@ -58,19 +70,29 @@ export default function CourseDetailPage() {
                         description: data.description || "Aciklama bulunmuyor.",
                         author: data.profiles?.username || "Anonim",
                         authorAvatar: data.profiles?.username?.substring(0, 2).toUpperCase() || "??",
+                        authorRole: data.profiles?.role || "student",
+                        authorId: data.author_id,
                         subject: data.subject,
                         grade: data.grade,
-                        duration: "45 dk", // Mock
-                        views: 0, // Mock
-                        likes: data.likes || 0,
+                        views: data.view_count || 0,
+                        likes: data.upvotes || 0,
                         resources: data.file_url ? [{ name: "Ders Notu (PDF)", type: "pdf", url: data.file_url }] : [],
                     })
+
+                    setLikeCount(data.upvotes || 0)
 
                     if (!videoUrl && pdfUrl) {
                         setActiveTab("pdf")
                     } else {
                         setActiveTab("video")
                     }
+
+                    // Check edit permission
+                    const editAllowed = await canEditContent(data.author_id, data.subject)
+                    setCanEdit(editAllowed)
+
+                    // Increment view count
+                    incrementNoteViewCount(noteId)
                 } else {
                     setCourse(sampleCourse)
                     setActiveTab("video")
@@ -92,6 +114,36 @@ export default function CourseDetailPage() {
         return match && match[2].length === 11 ? match[2] : null
     }
 
+    async function handleLike() {
+        try {
+            const result = await vote(noteId, "note", "up")
+            if (result.action === "added") {
+                setLikeCount(prev => prev + 1)
+                setHasLiked(true)
+            } else if (result.action === "removed") {
+                setLikeCount(prev => prev - 1)
+                setHasLiked(false)
+            }
+        } catch {
+            toast.error("Beğenmek için giriş yapınız")
+        }
+    }
+
+    async function handleDelete() {
+        if (!confirm("Bu notu silmek istediğinize emin misiniz?")) return
+        setDeleting(true)
+        try {
+            const { error } = await deleteNote(noteId)
+            if (error) throw error
+            toast.success("Not silindi")
+            router.push("/")
+        } catch {
+            toast.error("Silme işlemi başarısız oldu")
+        } finally {
+            setDeleting(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex h-dvh items-center justify-center bg-background">
@@ -102,6 +154,7 @@ export default function CourseDetailPage() {
 
     const hasVideo = !!course?.videoUrl
     const hasPdf = !!course?.pdfUrl
+    const authorRoleLabel = course?.authorRole && roleLabels[course.authorRole]
 
     return (
         <div className="flex h-dvh overflow-hidden bg-background">
@@ -116,7 +169,7 @@ export default function CourseDetailPage() {
 
                 <main className="flex-1 overflow-y-auto">
                     <div className="mx-auto max-w-5xl px-4 py-6 lg:px-6">
-                        <div className="mb-4">
+                        <div className="mb-4 flex items-center justify-between">
                             <Link
                                 href="/"
                                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -124,6 +177,20 @@ export default function CourseDetailPage() {
                                 <ArrowLeft className="size-4" />
                                 Ana Sayfaya Don
                             </Link>
+                            {canEdit && (
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
+                                        onClick={handleDelete}
+                                        disabled={deleting}
+                                    >
+                                        <Trash2 className="size-3.5" />
+                                        Sil
+                                    </Button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Content Tabs Toggles */}
@@ -151,7 +218,7 @@ export default function CourseDetailPage() {
                         )}
 
                         <Card className="mb-6 overflow-hidden border-border/60 py-0 shadow-lg transition-all hover:shadow-xl">
-                            <div className="aspect-video w-full bg-foreground/5 relative group">
+                            <div className={`w-full bg-foreground/5 relative group ${activeTab === "video" ? "aspect-video" : "h-[70vh] sm:h-[80vh] min-h-[500px]"}`}>
                                 {activeTab === "video" && hasVideo ? (
                                     <iframe
                                         src={course.videoUrl}
@@ -161,10 +228,17 @@ export default function CourseDetailPage() {
                                         className="size-full"
                                     />
                                 ) : (activeTab === "pdf" && hasPdf) || (!hasVideo && hasPdf) ? (
-                                    <div className="size-full bg-card">
+                                    <div className="size-full bg-card relative overflow-hidden">
+                                        {/* Desktop native viewer */}
                                         <iframe
                                             src={`${course.pdfUrl}#toolbar=0`}
-                                            className="size-full border-none"
+                                            className="size-full border-none hidden sm:block"
+                                            title={course.title}
+                                        />
+                                        {/* Mobile viewer fallback */}
+                                        <iframe
+                                            src={`https://docs.google.com/viewer?url=${encodeURIComponent(course.pdfUrl)}&embedded=true`}
+                                            className="size-full border-none sm:hidden"
                                             title={course.title}
                                         />
                                         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -216,14 +290,27 @@ export default function CourseDetailPage() {
                                                 <AvatarFallback className="bg-primary/5 text-primary text-sm font-bold">{course?.authorAvatar}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="text-sm font-bold text-foreground leading-none">{course?.author}</p>
-                                                <p className="text-xs text-muted-foreground mt-1">Ogretmen / Mentor</p>
+                                                <div className="flex items-center gap-1.5">
+                                                    <p className="text-sm font-bold text-foreground leading-none">{course?.author}</p>
+                                                    {authorRoleLabel && (
+                                                        <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5">
+                                                            {authorRoleLabel}
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-5 text-sm font-medium text-muted-foreground">
                                             <span className="flex items-center gap-1.5"><Eye className="size-4" />{course?.views.toLocaleString("tr-TR")}</span>
-                                            <span className="flex items-center gap-1.5"><ThumbsUp className="size-4" />{course?.likes}</span>
-                                            <span className="flex items-center gap-1.5"><Clock className="size-4" />{course?.duration}</span>
+                                            <button
+                                                onClick={handleLike}
+                                                className={`flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors ${hasLiked
+                                                    ? "bg-primary/10 text-primary font-bold"
+                                                    : "hover:bg-muted hover:text-foreground"
+                                                    }`}
+                                            >
+                                                <ThumbsUp className="size-4" />{likeCount}
+                                            </button>
                                         </div>
                                     </div>
 

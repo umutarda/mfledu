@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client"
+import { validateTexts } from "@/lib/swear-filter"
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,39 @@ export async function getUser() {
     return data.user
 }
 
+// ─── ROLES & PERMISSIONS ──────────────────────────────────────────────────────
+
+export type UserRole = "student" | "teacher" | "admin"
+
+export async function getUserRole(): Promise<{ role: UserRole; subject: string | null } | null> {
+    const user = await getUser()
+    if (!user) return null
+    const supabase = createClient()
+    const { data } = await supabase
+        .from("profiles")
+        .select("role, subject")
+        .eq("id", user.id)
+        .maybeSingle()
+    return data ? { role: (data.role || 'student') as UserRole, subject: data.subject } : null
+}
+
+/**
+ * Check if the current user can edit/delete content.
+ * Returns true if user is: the author, an admin, or a teacher with matching subject.
+ */
+export async function canEditContent(authorId: string, contentSubject?: string | null): Promise<boolean> {
+    const user = await getUser()
+    if (!user) return false
+    if (user.id === authorId) return true
+
+    const roleInfo = await getUserRole()
+    if (!roleInfo) return false
+    if (roleInfo.role === "admin") return true
+    if (roleInfo.role === "teacher" && contentSubject && roleInfo.subject === contentSubject) return true
+
+    return false
+}
+
 // ─── QUESTIONS ────────────────────────────────────────────────────────────────
 
 export type QuestionFilter = "recent" | "unanswered" | "top"
@@ -37,7 +71,7 @@ export async function getQuestions(filter: QuestionFilter = "recent") {
         .from("questions")
         .select(`
       *,
-      profiles ( username, avatar_url, badge )
+      profiles ( username, avatar_url, badge, role )
     `)
 
     if (filter === "unanswered") {
@@ -55,7 +89,7 @@ export async function getQuestionById(id: string) {
     const supabase = createClient()
     return supabase
         .from("questions")
-        .select(`*, profiles ( username, avatar_url, badge, points )`)
+        .select(`*, profiles ( username, avatar_url, badge, points, role, subject )`)
         .eq("id", id)
         .single()
 }
@@ -65,12 +99,15 @@ export async function postQuestion(data: {
     body: string
     grade?: string
     subject?: string
+    unit?: string
     tags?: string[]
     youtube_url?: string
     pdf_url?: string
     image_url?: string
     is_off_topic?: boolean
 }) {
+    validateTexts(data.title, data.body)
+
     const supabase = createClient()
     const user = await getUser()
     if (!user) throw new Error("Giriş yapmalısınız")
@@ -80,6 +117,28 @@ export async function postQuestion(data: {
         author_id: user.id,
         grade: data.grade ? parseInt(data.grade) : null,
     })
+}
+
+export async function updateQuestion(id: string, data: {
+    title?: string
+    body?: string
+    subject?: string
+    grade?: string
+    unit?: string
+    tags?: string[]
+}) {
+    validateTexts(data.title, data.body)
+
+    const supabase = createClient()
+    const updateData: any = { ...data }
+    if (data.grade) updateData.grade = parseInt(data.grade)
+
+    return supabase.from("questions").update(updateData).eq("id", id)
+}
+
+export async function deleteQuestion(id: string) {
+    const supabase = createClient()
+    return supabase.from("questions").delete().eq("id", id)
 }
 
 export async function incrementViewCount(id: string) {
@@ -95,10 +154,10 @@ export async function getAnswersByQuestionId(questionId: string) {
         .from("answers")
         .select(`
       *,
-      profiles ( username, avatar_url, badge, points ),
+      profiles ( username, avatar_url, badge, points, role ),
       answer_replies (
         *,
-        profiles ( username, avatar_url )
+        profiles ( username, avatar_url, role )
       )
     `)
         .eq("question_id", questionId)
@@ -107,6 +166,8 @@ export async function getAnswersByQuestionId(questionId: string) {
 }
 
 export async function postAnswer(questionId: string, body: string) {
+    validateTexts(body)
+
     const supabase = createClient()
     const user = await getUser()
     if (!user) throw new Error("Giriş yapmalısınız")
@@ -122,6 +183,8 @@ export async function postAnswer(questionId: string, body: string) {
 }
 
 export async function postReply(answerId: string, body: string) {
+    validateTexts(body)
+
     const supabase = createClient()
     const user = await getUser()
     if (!user) throw new Error("Giriş yapmalısınız")
@@ -141,13 +204,23 @@ export async function markAnswerAccepted(answerId: string) {
     return supabase.from("answers").update({ is_accepted: true }).eq("id", answerId)
 }
 
+export async function deleteAnswer(id: string) {
+    const supabase = createClient()
+    return supabase.from("answers").delete().eq("id", id)
+}
+
+export async function deleteReply(id: string) {
+    const supabase = createClient()
+    return supabase.from("answer_replies").delete().eq("id", id)
+}
+
 // ─── NOTES ────────────────────────────────────────────────────────────────────
 
 export async function getNotes(filter?: { grade?: string; subject?: string }) {
     const supabase = createClient()
     let query = supabase
         .from("notes")
-        .select(`*, profiles ( username, avatar_url, badge )`)
+        .select(`*, profiles ( username, avatar_url, badge, role )`)
         .order("created_at", { ascending: false })
 
     if (filter?.grade) query = query.eq("grade", parseInt(filter.grade))
@@ -160,7 +233,7 @@ export async function getNoteById(id: string) {
     const supabase = createClient()
     return supabase
         .from("notes")
-        .select(`*, profiles ( username, avatar_url, badge, points )`)
+        .select(`*, profiles ( username, avatar_url, badge, points, role, subject )`)
         .eq("id", id)
         .single()
 }
@@ -169,7 +242,7 @@ export async function getNoteByFilter(grade: string, subject: string) {
     const supabase = createClient()
     return supabase
         .from("notes")
-        .select(`*, profiles ( username, avatar_url, badge, points )`)
+        .select(`*, profiles ( username, avatar_url, badge, points, role )`)
         .eq("grade", parseInt(grade))
         .eq("subject", subject)
         .order("created_at", { ascending: false })
@@ -181,12 +254,14 @@ export async function getCommentsByNoteId(noteId: string) {
     const supabase = createClient()
     return supabase
         .from("note_comments")
-        .select(`*, profiles ( username, avatar_url )`)
+        .select(`*, profiles ( username, avatar_url, role )`)
         .eq("note_id", noteId)
         .order("created_at", { ascending: false })
 }
 
 export async function postNoteComment(noteId: string, content: string) {
+    validateTexts(content)
+
     const supabase = createClient()
     const user = await getUser()
     if (!user) throw new Error("Giriş yapmalısınız")
@@ -198,16 +273,24 @@ export async function postNoteComment(noteId: string, content: string) {
     })
 }
 
+export async function deleteNoteComment(id: string) {
+    const supabase = createClient()
+    return supabase.from("note_comments").delete().eq("id", id)
+}
+
 export async function postNote(data: {
     title: string
     description?: string
     grade?: string
     subject?: string
+    unit?: string
     note_type?: string
     tags?: string[]
     youtube_url?: string
     file?: File | null
 }) {
+    validateTexts(data.title, data.description)
+
     const supabase = createClient()
     const user = await getUser()
     if (!user) throw new Error("Giriş yapmalısınız")
@@ -237,6 +320,7 @@ export async function postNote(data: {
         author_id: user.id,
         grade: data.grade ? parseInt(data.grade) : null,
         subject: data.subject,
+        unit: data.unit,
         note_type: data.note_type,
         tags: data.tags ?? [],
         youtube_url: data.youtube_url ?? null,
@@ -249,11 +333,38 @@ export async function postNote(data: {
     return res
 }
 
+export async function updateNote(id: string, data: {
+    title?: string
+    description?: string
+    subject?: string
+    grade?: string
+    unit?: string
+    tags?: string[]
+}) {
+    validateTexts(data.title, data.description)
+
+    const supabase = createClient()
+    const updateData: any = { ...data }
+    if (data.grade) updateData.grade = parseInt(data.grade)
+
+    return supabase.from("notes").update(updateData).eq("id", id)
+}
+
+export async function deleteNote(id: string) {
+    const supabase = createClient()
+    return supabase.from("notes").delete().eq("id", id)
+}
+
+export async function incrementNoteViewCount(noteId: string) {
+    const supabase = createClient()
+    return supabase.rpc("increment_note_view_count", { note_id: noteId })
+}
+
 // ─── VOTES ────────────────────────────────────────────────────────────────────
 
 export async function vote(
     targetId: string,
-    targetType: "question" | "answer",
+    targetType: "question" | "answer" | "note",
     direction: "up" | "down"
 ) {
     const supabase = createClient()
@@ -266,15 +377,17 @@ export async function vote(
         .select("id, direction")
         .eq("user_id", user.id)
         .eq("target_id", targetId)
-        .single()
+        .maybeSingle()
 
     if (existing) {
         if (existing.direction === direction) {
             // toggle off
             await supabase.from("votes").delete().eq("id", existing.id)
+            return { action: "removed" as const }
         } else {
             // switch direction
             await supabase.from("votes").update({ direction }).eq("id", existing.id)
+            return { action: "switched" as const }
         }
     } else {
         await supabase.from("votes").insert({
@@ -283,7 +396,42 @@ export async function vote(
             target_type: targetType,
             direction,
         })
+        return { action: "added" as const }
     }
+}
+
+/** Check if current user has voted on a target */
+export async function getUserVote(targetId: string): Promise<"up" | "down" | null> {
+    const supabase = createClient()
+    const user = await getUser()
+    if (!user) return null
+
+    const { data } = await supabase
+        .from("votes")
+        .select("direction")
+        .eq("user_id", user.id)
+        .eq("target_id", targetId)
+        .maybeSingle()
+
+    return data?.direction as ("up" | "down" | null) ?? null
+}
+
+/** Get vote count for a target */
+export async function getVoteCount(targetId: string): Promise<{ up: number; down: number }> {
+    const supabase = createClient()
+    const { count: up } = await supabase
+        .from("votes")
+        .select("id", { count: "exact", head: true })
+        .eq("target_id", targetId)
+        .eq("direction", "up")
+
+    const { count: down } = await supabase
+        .from("votes")
+        .select("id", { count: "exact", head: true })
+        .eq("target_id", targetId)
+        .eq("direction", "down")
+
+    return { up: up ?? 0, down: down ?? 0 }
 }
 
 // ─── LEADERBOARD ──────────────────────────────────────────────────────────────
@@ -317,7 +465,8 @@ export async function getLeaderboard(sortBy: "points" | "notes" = "points", limi
     const supabase = createClient()
     const query = supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, points, badge")
+        .select("id, username, full_name, avatar_url, points, badge, role")
+        .eq("role", "student")
         .order(sortBy === "points" ? "points" : "points", { ascending: false })
         .limit(limit)
     return query
@@ -331,12 +480,22 @@ export async function getProfileStats(userId: string) {
         .select("id", { count: "exact", head: true })
         .eq("author_id", userId)
 
-    // Total likes
-    const { data: notesData } = await supabase
+    // Total likes (from votes table — count upvotes on user's notes)
+    const { data: userNotes } = await supabase
         .from("notes")
-        .select("upvotes")
+        .select("id")
         .eq("author_id", userId)
-    const totalLikes = notesData?.reduce((sum, n) => sum + (n.upvotes || 0), 0) ?? 0
+
+    let totalLikes = 0
+    if (userNotes && userNotes.length > 0) {
+        const noteIds = userNotes.map(n => n.id)
+        const { count: likesCount } = await supabase
+            .from("votes")
+            .select("id", { count: "exact", head: true })
+            .in("target_id", noteIds)
+            .eq("direction", "up")
+        totalLikes = likesCount ?? 0
+    }
 
     // Total downloads
     const { data: dlData } = await supabase
@@ -371,7 +530,7 @@ export async function getNotesByAuthor(userId: string) {
     const supabase = createClient()
     return supabase
         .from("notes")
-        .select(`*, profiles ( username, avatar_url, badge )`)
+        .select(`*, profiles ( username, avatar_url, badge, role )`)
         .eq("author_id", userId)
         .order("created_at", { ascending: false })
         .limit(20)

@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { subjects } from "@/lib/data"
+import { subjects, unitsByGradeSubject } from "@/lib/data"
 import { toast } from "sonner"
 import { postQuestion } from "@/lib/supabase/queries"
 
@@ -41,6 +41,7 @@ export function QuickAskBar() {
   const [body, setBody] = useState("")
   const [grade, setGrade] = useState("")
   const [subject, setSubject] = useState("")
+  const [unit, setUnit] = useState("")
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
   const [imageAttached, setImageAttached] = useState<string | null>(null)
@@ -101,6 +102,7 @@ export function QuickAskBar() {
         body,
         grade: isOffTopic ? undefined : grade,
         subject: isOffTopic ? undefined : subject,
+        unit: isOffTopic ? undefined : unit,
         tags,
         youtube_url: youtubeUrl || undefined,
         is_off_topic: isOffTopic,
@@ -108,7 +110,7 @@ export function QuickAskBar() {
       if (error) throw error
       toast.success("Sorunuz basariyla paylasildi!")
       setOpen(false)
-      setTitle(""); setBody(""); setGrade(""); setSubject("")
+      setTitle(""); setBody(""); setGrade(""); setSubject(""); setUnit("")
       setTags([]); setImageAttached(null); setFileAttached(null)
       setYoutubeUrl(""); setIsOffTopic(false)
       router.refresh()
@@ -165,8 +167,8 @@ export function QuickAskBar() {
 
       {/* Ask Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg sm:max-w-xl overflow-hidden border-none p-0 !rounded-3xl shadow-2xl">
-          <div className="bg-gradient-to-r from-primary/10 via-background to-background p-6">
+        <DialogContent className="w-[96vw] max-w-lg sm:max-w-2xl max-h-[96dvh] overflow-y-auto border-none p-0 !rounded-3xl shadow-2xl">
+          <div className="bg-gradient-to-r from-primary/10 via-background to-background p-4 sm:p-6">
             <DialogHeader className="mb-4">
               <DialogTitle className="flex items-center gap-2 text-xl font-bold tracking-tight">
                 <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -233,7 +235,7 @@ export function QuickAskBar() {
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-medium ml-1">Ders</Label>
-                      <Select value={subject} onValueChange={setSubject}>
+                      <Select value={subject} onValueChange={(val) => { setSubject(val); setUnit(""); }}>
                         <SelectTrigger className="rounded-xl border-border/60 bg-muted/30 h-10">
                           <SelectValue placeholder="Ders sec" />
                         </SelectTrigger>
@@ -246,6 +248,25 @@ export function QuickAskBar() {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Unit Selector */}
+                    {grade && subject && (unitsByGradeSubject[`${grade}-${subject}`] || []).length > 0 && (
+                      <div className="col-span-2 space-y-1.5 mt-1">
+                        <Label className="text-xs font-medium ml-1">Ünite</Label>
+                        <Select value={unit} onValueChange={setUnit}>
+                          <SelectTrigger className="rounded-xl border-border/60 bg-muted/30 h-10 w-full">
+                            <SelectValue placeholder="Ünite Seç" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            {(unitsByGradeSubject[`${grade}-${subject}`] || []).map((u) => (
+                              <SelectItem key={u} value={u}>
+                                {u}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 )}
 

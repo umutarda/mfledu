@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { subjects } from "@/lib/data"
+import { subjects, unitsByGradeSubject } from "@/lib/data"
 import { toast } from "sonner"
 import { postNote } from "@/lib/supabase/queries"
 
@@ -53,6 +53,7 @@ export default function UploadPage() {
   const [description, setDescription] = useState("")
   const [grade, setGrade] = useState("")
   const [subject, setSubject] = useState("")
+  const [unit, setUnit] = useState("")
   const [noteType, setNoteType] = useState("")
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
@@ -111,6 +112,7 @@ export default function UploadPage() {
         description,
         grade,
         subject,
+        unit,
         note_type: noteType,
         tags,
         youtube_url: showYoutubeInput && videoUrl ? videoUrl : undefined,
@@ -211,7 +213,7 @@ export default function UploadPage() {
                       <Label>
                         Ders <span className="text-destructive">*</span>
                       </Label>
-                      <Select value={subject} onValueChange={setSubject}>
+                      <Select value={subject} onValueChange={(val) => { setSubject(val); setUnit(""); }}>
                         <SelectTrigger>
                           <SelectValue placeholder="Sec" />
                         </SelectTrigger>
@@ -224,23 +226,46 @@ export default function UploadPage() {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  {/* Unit Select - visible if grade and subject are chosen */}
+                  {grade && subject && (unitsByGradeSubject[`${grade}-${subject}`] || []).length > 0 && (
                     <div className="flex flex-col gap-2">
                       <Label>
-                        Tur <span className="text-destructive">*</span>
+                        Ünite
                       </Label>
-                      <Select value={noteType} onValueChange={setNoteType}>
+                      <Select value={unit} onValueChange={setUnit}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sec" />
+                          <SelectValue placeholder="Ünite Seç" />
                         </SelectTrigger>
                         <SelectContent>
-                          {noteTypes.map((t) => (
-                            <SelectItem key={t.value} value={t.value}>
-                              {t.label}
+                          {(unitsByGradeSubject[`${grade}-${subject}`] || []).map((u) => (
+                            <SelectItem key={u} value={u}>
+                              {u}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
+                  )}
+
+                  {/* Note Type & Tags */}
+                  <div className="flex flex-col gap-2">
+                    <Label>
+                      Tur <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={noteType} onValueChange={setNoteType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sec" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {noteTypes.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Tags */}

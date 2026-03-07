@@ -94,8 +94,8 @@ export function TopNav({ onMenuClick }: TopNavProps) {
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 lg:px-6">
-      <div className="flex items-center gap-3">
+    <header className="flex h-16 shrink-0 items-center border-b border-border bg-card px-3 lg:px-6 overflow-hidden gap-2">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
         <Button
           variant="ghost"
           size="icon"
@@ -106,8 +106,13 @@ export function TopNav({ onMenuClick }: TopNavProps) {
           <Menu className="size-5" />
         </Button>
 
+        {/* Mobile Logo - Text Only */}
+        <Link href="/" className="flex items-center gap-2 lg:hidden mr-2">
+          <span className="text-lg font-black tracking-tight text-primary">MFLEdu</span>
+        </Link>
+
         {/* Search */}
-        <div className="relative w-64 md:w-80">
+        <div className="relative flex-1 max-w-xs md:max-w-sm hidden sm:block">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Ders notu veya konu ara..."
@@ -172,7 +177,7 @@ export function TopNav({ onMenuClick }: TopNavProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 shrink-0">
         {/* Notifications */}
         <Popover open={notifOpen} onOpenChange={setNotifOpen}>
           <PopoverTrigger asChild>

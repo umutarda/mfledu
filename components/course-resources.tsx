@@ -6,7 +6,7 @@ import { PdfViewer } from "@/components/pdf-viewer"
 import { toast } from "sonner"
 
 interface CourseResourcesProps {
-  resources: { name: string; type: string }[]
+  resources: { name: string; type: string; url?: string }[]
 }
 
 export function CourseResources({ resources }: CourseResourcesProps) {
@@ -30,16 +30,19 @@ export function CourseResources({ resources }: CourseResourcesProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {resource.type === "pdf" && (
+              {resource.type === "pdf" && resource.url && (
                 <PdfViewer
-                  url="https://www.rd.usda.gov/sites/default/files/pdf-sample_0.pdf"
+                  url={resource.url}
                   title={resource.name}
                 />
               )}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleDownload(resource.name)}
+                onClick={() => {
+                  if (resource.url) window.open(resource.url, '_blank')
+                  else handleDownload(resource.name)
+                }}
                 className="h-9 px-3 rounded-xl gap-2 text-muted-foreground hover:text-primary hover:bg-primary/5"
               >
                 <Download className="size-4" />
