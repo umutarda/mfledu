@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import type { Question } from "@/lib/data"
 
 const roleLabels: Record<string, string> = {
-  teacher: "Öğretmen",
+  teacher: "Mentör",
   admin: "Admin",
 }
 
@@ -93,16 +93,32 @@ export function QuestionCard({ question }: QuestionCardProps) {
           {/* Header */}
           <div className="flex flex-col gap-1.5 mb-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <Avatar className="size-7 border border-primary/10 shrink-0">
-                <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
-                  {question.authorAvatar}
-                </AvatarFallback>
-              </Avatar>
+              {question.authorId ? (
+                <Link href={`/profile/${question.authorId}`}>
+                  <Avatar className="size-7 border border-primary/10 shrink-0 hover:border-primary/50 transition-colors">
+                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
+                      {question.authorAvatar}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              ) : (
+                <Avatar className="size-7 border border-primary/10 shrink-0">
+                  <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
+                    {question.authorAvatar}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-xs font-bold text-foreground transition-colors group-hover:text-primary truncate">
-                    {question.author}
-                  </span>
+                  {question.authorId ? (
+                    <Link href={`/profile/${question.authorId}`} className="text-xs font-bold text-foreground transition-colors group-hover:text-primary truncate hover:underline">
+                      {question.author}
+                    </Link>
+                  ) : (
+                    <span className="text-xs font-bold text-foreground transition-colors group-hover:text-primary truncate">
+                      {question.author}
+                    </span>
+                  )}
                   {question.authorBadge && (
                     <Badge
                       variant="secondary"

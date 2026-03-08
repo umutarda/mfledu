@@ -66,6 +66,7 @@ export type NoteCard = {
   author: string
   authorAvatar: string
   authorRole?: string
+  authorId?: string
   subject: string
   grade: Grade
   upvotes: number
@@ -323,6 +324,7 @@ export type Question = {
   authorAvatar: string
   authorBadge?: string
   authorRole?: string
+  authorId?: string
   subject: string
   grade: Grade
   tags: string[]
@@ -342,6 +344,7 @@ export type Answer = {
   author: string
   authorAvatar: string
   authorBadge?: string
+  authorId?: string
   content: string
   likes: number
   createdAt: string
@@ -353,6 +356,7 @@ export type AnswerReply = {
   id: string
   author: string
   authorAvatar: string
+  authorId?: string
   content: string
   createdAt: string
   likes: number
@@ -411,7 +415,7 @@ export const communityQuestions: Question[] = [
     body: "Duraklama doneminin ic ve dis sebeplerini karistiriyorum. Ozellikle Celali isyanlari ve Kapikulu Ocagi'nin bozulmasi arasindaki farki aciklayabilir misiniz?",
     author: "Elif Yilmaz",
     authorAvatar: "EY",
-    authorBadge: "Mentor",
+    authorBadge: "Uzman Öğrenci",
     subject: "Tarih",
     grade: "10",
     tags: ["Osmanli", "10. Sinif", "Tarih"],
@@ -458,7 +462,7 @@ export const questionAnswers: Record<string, Answer[]> = {
       questionId: "q1",
       author: "Elif Yilmaz",
       authorAvatar: "EY",
-      authorBadge: "Mentor",
+      authorBadge: "Uzman Öğrenci",
       content:
         "Zincirleme kurali, ic ice fonksiyonlar oldugunda kullanilir. Ornegin f(x) = sin(x²) gibi bir fonksiyonda dis fonksiyon sin, ic fonksiyon x²'dir. Turev alirken once disin turevini alip icini oldugu gibi birakir, sonra icin turevini carparsın. Yani f'(x) = cos(x²) · 2x olur.",
       likes: 18,

@@ -108,7 +108,7 @@ export function TopNav({ onMenuClick }: TopNavProps) {
 
         {/* Mobile Logo - Text Only */}
         <Link href="/" className="flex items-center gap-2 lg:hidden mr-2">
-          <span className="text-lg font-black tracking-tight text-primary">MFLEdu</span>
+          <span className="text-lg font-black tracking-tight text-primary">Sorium</span>
         </Link>
 
         {/* Search */}

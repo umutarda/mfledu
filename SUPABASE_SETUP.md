@@ -1,4 +1,4 @@
-# Supabase Setup Guide for EAFLEdu
+# Supabase Setup Guide for Sorium
 
 Follow these steps to set up your Supabase project and get the application running with real data.
 

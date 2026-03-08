@@ -88,10 +88,10 @@ function AppSidebarInner() {
       {/* Logo */}
       <Link href="/" className="flex h-20 items-center gap-3 px-6 shrink-0 border-b border-sidebar-border/30">
         <div className="flex size-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-white/10 ring-1 ring-white/20">
-          <img src="/logo2.png" alt="MFLEdu" className="size-6" />
+          <img src="/logo2.png" alt="Sorium" className="size-6" />
         </div>
         <div className="flex flex-col">
-          <span className="text-xl font-black tracking-tighter text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">MFLEdu</span>
+          <span className="text-xl font-black tracking-tighter text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">Sorium</span>
           <span className="text-[9px] font-bold text-sky-300 uppercase tracking-widest leading-none">Geleceğin İzinde</span>
         </div>
       </Link>
@@ -184,7 +184,7 @@ function AppSidebarInner() {
                         profile.role === 'teacher' ? 'bg-emerald-500/10 text-emerald-600' :
                           'bg-blue-500/10 text-blue-500'
                         }`}>
-                        {profile.role === 'teacher' ? 'Öğretmen' : profile.role === 'admin' ? 'Admin' : 'Öğrenci'}
+                        {profile.role === 'teacher' ? 'Mentör' : profile.role === 'admin' ? 'Admin' : 'Öğrenci'}
                       </Badge>
                     )}
                     {profile.grade && profile.role !== 'teacher' && profile.role !== 'admin' && (

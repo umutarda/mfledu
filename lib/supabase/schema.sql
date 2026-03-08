@@ -1,5 +1,5 @@
 -- ============================================================
--- EAFLEdu – Supabase Schema
+-- Sorium – Supabase Schema
 -- Run this in: Supabase Dashboard > SQL Editor > New Query
 -- ============================================================
 

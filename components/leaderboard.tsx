@@ -20,7 +20,7 @@ export function Leaderboard({ contributors }: LeaderboardProps) {
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-base">
           <Trophy className="size-4 text-accent" />
-          Haftanin Mentorlari
+          Haftanın Öğrencileri
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -32,9 +32,8 @@ export function Leaderboard({ contributors }: LeaderboardProps) {
               className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
             >
               <span
-                className={`w-5 text-center text-sm font-bold ${
-                  rankColors[contributor.rank] || "text-muted-foreground"
-                }`}
+                className={`w-5 text-center text-sm font-bold ${rankColors[contributor.rank] || "text-muted-foreground"
+                  }`}
               >
                 {contributor.rank <= 3 ? (
                   <Star className="size-4 inline fill-current" />

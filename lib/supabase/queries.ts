@@ -582,6 +582,16 @@ export async function getCurrentProfile() {
     return data
 }
 
+export async function getProfileById(userId: string) {
+    const supabase = createClient()
+    const { data } = await supabase
+        .from("profiles")
+        .select("id, username, full_name, avatar_url, bio, role, badge, points, subject, grade, created_at")
+        .eq("id", userId)
+        .single()
+    return data
+}
+
 export async function updateProfile(data: {
     username?: string
     full_name?: string

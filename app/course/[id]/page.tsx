@@ -32,7 +32,7 @@ import { toast } from "sonner"
 
 const roleLabels: Record<string, string> = {
     student: "Öğrenci",
-    teacher: "Öğretmen",
+    teacher: "Mentör",
     admin: "Admin",
 }
 
@@ -286,12 +286,26 @@ export default function CourseDetailPage() {
 
                                     <div className="flex flex-wrap items-center justify-between gap-6 pt-2">
                                         <div className="flex items-center gap-3">
-                                            <Avatar className="size-11 border-2 border-primary/10">
-                                                <AvatarFallback className="bg-primary/5 text-primary text-sm font-bold">{course?.authorAvatar}</AvatarFallback>
-                                            </Avatar>
+                                            {course?.authorId ? (
+                                                <Link href={`/profile/${course.authorId}`}>
+                                                    <Avatar className="size-11 border-2 border-primary/10 hover:border-primary/40 transition-colors">
+                                                        <AvatarFallback className="bg-primary/5 text-primary text-sm font-bold">{course?.authorAvatar}</AvatarFallback>
+                                                    </Avatar>
+                                                </Link>
+                                            ) : (
+                                                <Avatar className="size-11 border-2 border-primary/10">
+                                                    <AvatarFallback className="bg-primary/5 text-primary text-sm font-bold">{course?.authorAvatar}</AvatarFallback>
+                                                </Avatar>
+                                            )}
                                             <div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <p className="text-sm font-bold text-foreground leading-none">{course?.author}</p>
+                                                    {course?.authorId ? (
+                                                        <Link href={`/profile/${course.authorId}`} className="text-sm font-bold text-foreground leading-none hover:text-primary transition-colors hover:underline">
+                                                            {course?.author}
+                                                        </Link>
+                                                    ) : (
+                                                        <p className="text-sm font-bold text-foreground leading-none">{course?.author}</p>
+                                                    )}
                                                     {authorRoleLabel && (
                                                         <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5">
                                                             {authorRoleLabel}

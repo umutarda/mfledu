@@ -8,24 +8,24 @@ $SERVER_IP = "167.99.136.40"
 $SSH_USER = "root"
 $SSH_KEY = "C:\Users\umut.tuncar\.ssh\digital_ocean"
 $REMOTE_DIR = "~/frontend_image"
-$TAR_NAME = "mfledu-frontend.tar"
+$TAR_NAME = "sorium-frontend.tar"
 
 if (-not $NoBuild) {
     Write-Host "Building the Docker image locally..." -ForegroundColor Cyan
-    docker build -t mfledu-frontend .
+    docker build -t sorium-frontend .
 }
 else {
     # Verify the image exists locally even if we skip build
-    $imageExists = docker images -q mfledu-frontend 2>$null
+    $imageExists = docker images -q sorium-frontend 2>$null
     if (-not $imageExists) {
-        Write-Error "Error: Docker image 'mfledu-frontend' not found locally. Run without -NoBuild first."
+        Write-Error "Error: Docker image 'sorium-frontend' not found locally. Run without -NoBuild first."
         exit 1
     }
     Write-Host "Skipping build, using existing local image." -ForegroundColor Yellow
 }
 
 Write-Host "Saving the image to a tarball ($TAR_NAME)..." -ForegroundColor Cyan
-docker save -o $TAR_NAME mfledu-frontend
+docker save -o $TAR_NAME sorium-frontend
 
 Write-Host "Ensuring remote directory exists..." -ForegroundColor Cyan
 ssh -i $SSH_KEY ${SSH_USER}@${SERVER_IP} "mkdir -p $REMOTE_DIR"
@@ -40,11 +40,11 @@ echo 'Loading Docker image...'
 docker load -i $TAR_NAME
 
 echo 'Stopping existing container (if running)...'
-docker stop mfledu 2>/dev/null || true
-docker rm mfledu 2>/dev/null || true
+docker stop sorium 2>/dev/null || true
+docker rm sorium 2>/dev/null || true
 
-echo 'Starting new container...'
-docker run -d -p 3000:3000 --name mfledu --restart always mfledu-frontend
+# Run new container
+docker run -d -p 3000:3000 --name sorium --restart always sorium-frontend
 
 echo 'Cleaning up remote tar file to save space...'
 rm $TAR_NAME

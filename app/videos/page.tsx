@@ -181,8 +181,8 @@ function VideosContent() {
                                 <Youtube className="size-6 text-red-500" />
                                 Video Dersler
                             </h1>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Öğrenciler ve mentorlar tarafından paylaşılan konu anlatım videoları
+                            <p className="mt-2 text-sm text-muted-foreground max-w-2xl mx-auto">
+                                Öğrenciler ve Mentörler tarafından paylaşılan konu anlatım videoları
                             </p>
                         </div>
 

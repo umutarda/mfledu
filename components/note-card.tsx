@@ -25,7 +25,7 @@ import { vote } from "@/lib/supabase/queries"
 import { toast } from "sonner"
 
 const roleLabels: Record<string, string> = {
-  teacher: "Öğretmen",
+  teacher: "Mentör",
   admin: "Admin",
 }
 
@@ -119,12 +119,25 @@ export function NoteCard({ note }: NoteCardProps) {
 
         <CardFooter className="flex items-center justify-between border-t border-border/40 bg-muted/30 py-3">
           <div className="flex items-center gap-2">
-            <Avatar className="size-6">
-              <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
-                {note.authorAvatar}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs text-muted-foreground">{note.author}</span>
+            {note.authorId ? (
+              <Link href={`/profile/${note.authorId}`} className="flex items-center gap-2 group/author">
+                <Avatar className="size-6 border border-transparent group-hover/author:border-primary/30 transition-colors">
+                  <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
+                    {note.authorAvatar}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-muted-foreground group-hover/author:text-primary transition-colors hover:underline">{note.author}</span>
+              </Link>
+            ) : (
+              <>
+                <Avatar className="size-6">
+                  <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
+                    {note.authorAvatar}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-muted-foreground">{note.author}</span>
+              </>
+            )}
             {roleBadge && (
               <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5">
                 {roleBadge}
@@ -203,16 +216,32 @@ export function NoteCard({ note }: NoteCardProps) {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Avatar className="size-7">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                    {note.authorAvatar}
-                  </AvatarFallback>
-                </Avatar>
+                {note.authorId ? (
+                  <Link href={`/profile/${note.authorId}`}>
+                    <Avatar className="size-7 hover:ring-2 hover:ring-primary/20 transition-all">
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                        {note.authorAvatar}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+                ) : (
+                  <Avatar className="size-7">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      {note.authorAvatar}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-foreground">
-                      {note.author}
-                    </p>
+                    {note.authorId ? (
+                      <Link href={`/profile/${note.authorId}`} className="text-sm font-medium text-foreground hover:text-primary transition-colors hover:underline">
+                        {note.author}
+                      </Link>
+                    ) : (
+                      <p className="text-sm font-medium text-foreground">
+                        {note.author}
+                      </p>
+                    )}
                     {roleBadge && (
                       <Badge variant="outline" className="text-[9px] h-4 px-1 border-emerald-500/30 text-emerald-600">
                         {roleBadge}

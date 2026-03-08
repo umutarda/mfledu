@@ -79,12 +79,9 @@ export default function LeaderboardPage() {
             </Link>
 
             <div className="mb-6">
-              <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-                <Trophy className="size-6 text-accent" />
-                Sıralama Tablosu
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                En çok katkı sağlayan öğrenciler ve mentor adayları
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-center">🏆 Liderlik Tablosu</h1>
+              <p className="mt-2 text-base text-muted-foreground text-center">
+                En çok katkı sağlayan öğrenciler
               </p>
             </div>
 
@@ -181,7 +178,7 @@ export default function LeaderboardPage() {
                               variant="secondary"
                               className="text-[10px] bg-accent/15 text-accent border-0"
                             >
-                              Mentor
+                              Uzman Öğrenci
                             </Badge>
                           )}
                         </div>

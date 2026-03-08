@@ -55,7 +55,7 @@ import {
 } from "@/lib/supabase/queries"
 
 const roleLabels: Record<string, string> = {
-  teacher: "Öğretmen",
+  teacher: "Mentör",
   admin: "Admin",
 }
 
@@ -91,6 +91,7 @@ export default function QuestionThreadPage() {
           authorAvatar: q.profiles?.username?.substring(0, 2).toUpperCase() || "??",
           authorBadge: q.profiles?.badge,
           authorPoints: q.profiles?.points,
+          authorId: q.author_id,
           createdAt: new Date(q.created_at).toLocaleDateString("tr-TR")
         })
 
@@ -100,11 +101,13 @@ export default function QuestionThreadPage() {
             author: a.profiles?.username || "Anonim",
             authorAvatar: a.profiles?.username?.substring(0, 2).toUpperCase() || "??",
             authorBadge: a.profiles?.badge,
+            authorId: a.author_id,
             createdAt: new Date(a.created_at).toLocaleDateString("tr-TR"),
             replies: a.answer_replies.map((r: any) => ({
               ...r,
               author: r.profiles?.username || "Anonim",
               authorAvatar: r.profiles?.username?.substring(0, 2).toUpperCase() || "??",
+              authorId: r.author_id,
               createdAt: new Date(r.created_at).toLocaleDateString("tr-TR")
             }))
           })))
@@ -357,16 +360,32 @@ function QuestionHeader({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              <Avatar className="size-10 border-2 border-primary/20">
-                <AvatarFallback className="bg-primary/5 text-primary text-sm font-black">
-                  {question.authorAvatar}
-                </AvatarFallback>
-              </Avatar>
+              {question.authorId ? (
+                <Link href={`/profile/${question.authorId}`}>
+                  <Avatar className="size-10 border-2 border-primary/20 hover:border-primary/50 transition-colors">
+                    <AvatarFallback className="bg-primary/5 text-primary text-sm font-black">
+                      {question.authorAvatar}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              ) : (
+                <Avatar className="size-10 border-2 border-primary/20">
+                  <AvatarFallback className="bg-primary/5 text-primary text-sm font-black">
+                    {question.authorAvatar}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-foreground">
-                    {question.author}
-                  </span>
+                  {question.authorId ? (
+                    <Link href={`/profile/${question.authorId}`} className="text-sm font-bold text-foreground hover:text-primary transition-colors hover:underline">
+                      {question.author}
+                    </Link>
+                  ) : (
+                    <span className="text-sm font-bold text-foreground">
+                      {question.author}
+                    </span>
+                  )}
                   {question.authorBadge && (
                     <Badge
                       variant="secondary"
@@ -538,13 +557,23 @@ function AnswerCard({ answer }: { answer: any }) {
 
         <div className="flex gap-4">
           <div className="flex flex-col items-center shrink-0">
-            <Avatar className="size-11 border-2 border-primary/10 mb-2">
-              <AvatarFallback className="bg-primary/5 text-primary text-sm font-black">
-                {answer.authorAvatar}
-              </AvatarFallback>
-            </Avatar>
-            {answer.authorBadge === 'Mentor' && (
-              <div className="rounded-full bg-amber-500/10 p-1 text-amber-600" title="Mentor">
+            {answer.authorId ? (
+              <Link href={`/profile/${answer.authorId}`}>
+                <Avatar className="size-11 border-2 border-primary/10 mb-2 hover:border-primary/40 transition-colors">
+                  <AvatarFallback className="bg-primary/5 text-primary text-sm font-black">
+                    {answer.authorAvatar}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            ) : (
+              <Avatar className="size-11 border-2 border-primary/10 mb-2">
+                <AvatarFallback className="bg-primary/5 text-primary text-sm font-black">
+                  {answer.authorAvatar}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            {answer.authorBadge === 'Uzman Öğrenci' && (
+              <div className="rounded-full bg-amber-500/10 p-1 text-amber-600" title="Uzman Öğrenci">
                 <Award className="size-4" />
               </div>
             )}
@@ -553,9 +582,15 @@ function AnswerCard({ answer }: { answer: any }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-foreground">
-                  {answer.author}
-                </span>
+                {answer.authorId ? (
+                  <Link href={`/profile/${answer.authorId}`} className="text-sm font-bold text-foreground hover:text-primary transition-colors hover:underline">
+                    {answer.author}
+                  </Link>
+                ) : (
+                  <span className="text-sm font-bold text-foreground">
+                    {answer.author}
+                  </span>
+                )}
                 {answer.authorBadge && (
                   <Badge
                     variant="secondary"
@@ -654,16 +689,32 @@ function ReplyItem({ reply }: { reply: any }) {
 
   return (
     <div className="flex gap-3 animate-in fade-in duration-500 translate-y-0">
-      <Avatar className="size-8 shrink-0 border border-primary/10">
-        <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black">
-          {reply.authorAvatar}
-        </AvatarFallback>
-      </Avatar>
+      {reply.authorId ? (
+        <Link href={`/profile/${reply.authorId}`}>
+          <Avatar className="size-8 shrink-0 border border-primary/10 hover:border-primary/40 transition-colors">
+            <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black">
+              {reply.authorAvatar}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
+      ) : (
+        <Avatar className="size-8 shrink-0 border border-primary/10">
+          <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black">
+            {reply.authorAvatar}
+          </AvatarFallback>
+        </Avatar>
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-bold text-foreground">
-            {reply.author}
-          </span>
+          {reply.authorId ? (
+            <Link href={`/profile/${reply.authorId}`} className="text-xs font-bold text-foreground hover:text-primary transition-colors hover:underline">
+              {reply.author}
+            </Link>
+          ) : (
+            <span className="text-xs font-bold text-foreground">
+              {reply.author}
+            </span>
+          )}
           <span className="text-[10px] text-muted-foreground">
             {reply.createdAt}
           </span>

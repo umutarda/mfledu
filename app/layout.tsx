@@ -8,9 +8,9 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'MFLEdu - Ders Desteği',
+  title: 'Sorium - Ders Desteği',
   description:
-    'Akran destekli ogrenme platformu. Ders notlari, video dersler ve ogrenci mentorluguyla akademik basariya ulasın.',
+    'Akran destekli ogrenme platformu. Ders notlari ve video dersler ile akademik basariya ulasın.',
   generator: 'v0.app',
   icons: {
     icon: '/favicon.ico',

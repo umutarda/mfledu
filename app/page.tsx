@@ -95,6 +95,7 @@ function DashboardContent() {
               authorAvatar: q.profiles?.username?.substring(0, 2).toUpperCase() || "??",
               authorBadge: q.profiles?.badge,
               authorRole: q.profiles?.role,
+              authorId: q.author_id,
               createdAt: new Date(q.created_at).toLocaleDateString("tr-TR"),
               subject: q.subject,
               grade: q.grade,
@@ -119,6 +120,7 @@ function DashboardContent() {
             author: n.profiles?.username || "Anonim",
             authorAvatar: n.profiles?.username?.substring(0, 2).toUpperCase() || "??",
             authorRole: n.profiles?.role,
+            authorId: n.author_id,
             upvotes: n.upvotes,
             downloads: n.downloads,
             youtubeUrl: n.youtube_url,
@@ -179,8 +181,8 @@ function DashboardContent() {
         {/* Scrolling Marquee - Absolute Top */}
         <div className="shrink-0 overflow-hidden bg-gradient-to-r from-primary via-indigo-600 to-primary text-white text-[11px] font-bold py-1.5 shadow-md">
           <div className="flex whitespace-nowrap" style={{ animation: 'marquee 35s linear infinite' }}>
-            <span className="px-8">🎓 MFLEDU &mdash; MFL Gelişim ve Eğitim Platformu &nbsp;&nbsp;|&nbsp;&nbsp; Bir GENÇBİZZ Girişimcilik Projesi &nbsp;&nbsp;|&nbsp;&nbsp; Proje Sahipleri: Gülay Gülderen Sezgen, Eylül Kurnaz, Yağmur Ceylin YILDIRIM, Derin Ateş, Melinsu Yüksel, Furkan Efe Şen &nbsp;&nbsp;|&nbsp;&nbsp; İz Eğitim'in katkılarıyla hayata geçirilmiştir &nbsp;&nbsp;|&nbsp;&nbsp; 🚀 Sınav yolculuğunda en iyi arkadaşın! &nbsp;&nbsp;|&nbsp;&nbsp;</span>
-            <span className="px-8">🎓 MFLEDU &mdash; MFL Gelişim ve Eğitim Platformu &nbsp;&nbsp;|&nbsp;&nbsp; Bir GENÇBİZZ Girişimcilik Projesi &nbsp;&nbsp;|&nbsp;&nbsp; Proje Sahipleri: Gülay Gülderen Sezgen, Eylül Kurnaz, Yağmur Ceylin YILDIRIM, Derin Ateş, Melinsu Yüksel, Furkan Efe Şen &nbsp;&nbsp;|&nbsp;&nbsp; İz Eğitim'in katkılarıyla hayata geçirilmiştir &nbsp;&nbsp;|&nbsp;&nbsp; 🚀 Sınav yolculuğunda en iyi arkadaşın! &nbsp;&nbsp;|&nbsp;&nbsp;</span>
+            <span className="px-8">🎓 SORIUM &mdash; Gelişim ve Eğitim Platformu &nbsp;&nbsp;|&nbsp;&nbsp; Bir GENÇBİZZ Girişimcilik Projesi &nbsp;&nbsp;|&nbsp;&nbsp; Proje Sahipleri: Gülay Gülderen Sezgen, Eylül Kurnaz, Yağmur Ceylin YILDIRIM, Derin Ateş, Melinsu Yüksel, Furkan Efe Şen &nbsp;&nbsp;|&nbsp;&nbsp; İz Eğitim'in katkılarıyla hayata geçirilmiştir &nbsp;&nbsp;|&nbsp;&nbsp; 🚀 Sınav yolculuğunda en iyi arkadaşın! &nbsp;&nbsp;|&nbsp;&nbsp;</span>
+            <span className="px-8">🎓 SORIUM &mdash; Gelişim ve Eğitim Platformu &nbsp;&nbsp;|&nbsp;&nbsp; Bir GENÇBİZZ Girişimcilik Projesi &nbsp;&nbsp;|&nbsp;&nbsp; Proje Sahipleri: Gülay Gülderen Sezgen, Eylül Kurnaz, Yağmur Ceylin YILDIRIM, Derin Ateş, Melinsu Yüksel, Furkan Efe Şen &nbsp;&nbsp;|&nbsp;&nbsp; İz Eğitim'in katkılarıyla hayata geçirilmiştir &nbsp;&nbsp;|&nbsp;&nbsp; 🚀 Sınav yolculuğunda en iyi arkadaşın! &nbsp;&nbsp;|&nbsp;&nbsp;</span>
           </div>
         </div>
 
@@ -292,7 +294,7 @@ function DashboardContent() {
                   {/* Role Filter Chips */}
                   <div className="flex items-center gap-2 mb-3 flex-wrap">
                     <span className="text-[11px] font-semibold text-muted-foreground">Paylaşan:</span>
-                    {([["", "Tümü"], ["student", "Öğrenci"], ["teacher", "Öğretmen"]] as const).map(([val, label]) => (
+                    {([["", "Tümü"], ["student", "Öğrenci"], ["teacher", "Mentör"]] as const).map(([val, label]) => (
                       <button
                         key={val}
                         onClick={() => setRoleFilter(val as any)}

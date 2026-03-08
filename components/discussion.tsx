@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { ThumbsUp, Flag, Send, Trash2 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +13,7 @@ import { getCommentsByNoteId, postNoteComment, deleteNoteComment, canEditContent
 import { toast } from "sonner"
 
 const roleLabels: Record<string, string> = {
-  teacher: "Öğretmen",
+  teacher: "Mentör",
   admin: "Admin",
 }
 
@@ -170,16 +171,32 @@ export function Discussion({ noteId, initialComments = [] }: DiscussionProps) {
               key={comment.id}
               className="flex gap-3 rounded-lg p-3 transition-colors hover:bg-muted/30"
             >
-              <Avatar className="size-8 shrink-0">
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                  {comment.authorAvatar}
-                </AvatarFallback>
-              </Avatar>
+              {comment.authorId ? (
+                <Link href={`/profile/${comment.authorId}`}>
+                  <Avatar className="size-8 shrink-0 hover:ring-2 hover:ring-primary/20 transition-all">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      {comment.authorAvatar}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              ) : (
+                <Avatar className="size-8 shrink-0">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                    {comment.authorAvatar}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-foreground">
-                    {comment.author}
-                  </span>
+                  {comment.authorId ? (
+                    <Link href={`/profile/${comment.authorId}`} className="text-sm font-medium text-foreground hover:text-primary transition-colors hover:underline">
+                      {comment.author}
+                    </Link>
+                  ) : (
+                    <span className="text-sm font-medium text-foreground">
+                      {comment.author}
+                    </span>
+                  )}
                   {roleBadge && (
                     <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5">
                       {roleBadge}

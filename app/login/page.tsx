@@ -68,10 +68,10 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div className="mb-8 flex flex-col items-center text-center">
                     <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-2xl shadow-primary/20 transition-transform hover:scale-105">
-                        <img src="/logo2.png" alt="MFLEdu" className="size-10" />
+                        <img src="/logo2.png" alt="Sorium" className="size-10" />
                     </div>
                     <h1 className="text-3xl font-black tracking-tight text-foreground">
-                        MFLEdu<span className="text-primary">'ya dön!</span>
+                        Sorium<span className="text-primary">'ya dön!</span>
                     </h1>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Turkiye'nin en aktif akademik sosyal platformuna giris yap.
@@ -88,7 +88,7 @@ export default function LoginPage() {
                                     <Input
                                         id="email"
                                         type="email"
-                                        placeholder="ornek@eafledu.com"
+                                        placeholder="ornek@sorium.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="h-12 pl-10 rounded-xl bg-muted/30 border-border/40 focus-visible:ring-primary/20"

@@ -24,7 +24,7 @@ import { getCurrentProfile, getProfileStats, getNotesByAuthor, getUser } from "@
 
 const roleLabels: Record<string, string> = {
   student: "Öğrenci",
-  teacher: "Öğretmen",
+  teacher: "Mentör",
   admin: "Admin",
 }
 
@@ -33,19 +33,19 @@ function getBadges(points: number, notesShared: number) {
   const badges = []
   if (notesShared >= 1) badges.push({ name: "İlk Adım", desc: "İlk notu yükledi", color: "bg-chart-4/10 text-chart-4" })
   if (notesShared >= 5) badges.push({ name: "Not Paylaşımcı", desc: "5+ not yüklendi", color: "bg-primary/10 text-primary" })
-  if (points >= 100) badges.push({ name: "Yardımsever", desc: "100+ puan kazanıldı", color: "bg-accent/15 text-accent" })
-  if (points >= 500) badges.push({ name: "Mentor Adayı", desc: "500+ puan kazanıldı", color: "bg-orange-400/10 text-orange-400" })
-  if (points >= 2000) badges.push({ name: "Mentor", desc: "2000+ puan – topluluk önderi", color: "bg-accent/20 text-accent" })
+  if (points >= 100) badges.push({ name: "Yardımsever", desc: "100+ puan kazanıldı", color: "bg-blue-500/10 text-blue-500" })
+  if (points >= 500) badges.push({ name: "Aktif Öğrenci", desc: "500+ puan kazanıldı", color: "bg-orange-400/10 text-orange-400" })
+  if (points >= 2000) badges.push({ name: "Uzman Öğrenci", desc: "2000+ puan – topluluk önderi", color: "bg-accent/20 text-accent" })
   return badges
 }
 
 function getLevelInfo(points: number) {
   const levels = [
     { name: "Yeni Üye", min: 0, max: 100 },
-    { name: "Aktif Öğrenci", min: 100, max: 500 },
-    { name: "Katkı Sağlayıcı", min: 500, max: 2000 },
-    { name: "Mentor Adayı", min: 2000, max: 5000 },
-    { name: "Mentor", min: 5000, max: 10000 },
+    { name: "Çömez", min: 0, max: 100 },
+    { name: "Yardımsever", min: 100, max: 500 },
+    { name: "Aktif Öğrenci", min: 2000, max: 5000 },
+    { name: "Uzman Öğrenci", min: 5000, max: 10000 },
   ]
   const current = levels.findLast(l => points >= l.min) ?? levels[0]
   const next = levels.find(l => l.min > points)
